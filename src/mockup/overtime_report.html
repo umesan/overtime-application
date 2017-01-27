@@ -1,0 +1,3679 @@
+ｓ
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>万屋一家ver.2</title>
+	<meta name="robots" content="noindex" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="pragma" content="no-cache" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+	<link rel="shortcut icon" href="common/ico/kinnosuke_icon.ico" />
+	<link type="text/css" rel="stylesheet" href="common/css/v2_common.css" />
+	<link type="text/css" rel="stylesheet" href="common/css/v2_webkit_default.css" />
+	<script type="text/javascript" src="common/js/dojo/dojo/dojo.js"
+		 	djConfig="parseOnLoad:true"
+		></script>
+	
+	<script type="text/javascript">
+		<!--
+			
+function __catchEnterUserDef(evt,___callbackfunc) {
+	if(evt.keyCode == 13 || evt.which == 13) {
+		if(typeof ___callbackfunc === 'function') {
+			___callbackfunc(evt);
+		}
+		return false;
+	}
+	return true;
+}
+function __catchEnter(evt) {
+	if(typeof __catchEnterCallback === 'function') {
+		return __catchEnterUserDef(evt,__catchEnterCallback);
+	} else {
+		return __catchEnterUserDef(evt,null);
+	}
+}
+
+	window.onload = function() {
+
+	replaceAllHtmlForReflectValue();	
+	}
+	var statusLabels = {1:'承認',2:'決裁',3:'閲覧'};
+	var transferBuffer;
+	var transferBufferTimesheet = {};
+	var rowMod = 0;
+	var clickedRow = null;
+	var isChanged = false;
+	
+	function hasChanged() {
+		isChanged = true;
+	}
+	function routeChanged() {
+		hasChanged();
+		clearRouteIndividuals();
+		document.getElementById('toggle_view').style.display='none';
+	}
+	
+	function clearRouteIndividuals() {
+		tbl = document.getElementById('route_individual');
+		rows = tbl.rows;
+		rowcount = rows.length;
+		for(j=0;j<rowcount;j++) {
+			tbl.deleteRow(0);	
+		}
+	}
+	
+	function _updateElement(elementName,value) {
+		try {
+			var selectBox = document.getElementById(elementName);
+			for(var i=0;i<selectBox.options.length;i++) {
+				var option = selectBox.options[i];
+				if(parseInt(option.value,10) == parseInt(value,10)) {
+					option.selected = true;
+					break;
+				}
+			}
+		} catch(e){};
+	}
+	
+	function updateDateSelection() {
+		var setYear = transferBufferTimesheet[0];
+		var setMonth = transferBufferTimesheet[1];
+		var setDay = transferBufferTimesheet[2];
+		
+		var setId = padDigits(transferBufferTimesheet[3],3);
+		
+		var setStipnum = transferBufferTimesheet[4];
+		
+		_updateElement('application_reflect_date_'+setId+'_Day_ID',setDay);
+		_updateElement('application_reflect_date_'+setId+'_Month_ID',setMonth);
+		_updateElement('application_reflect_date_'+setId+'_Year_ID',setYear);
+		_updateElement('value_date_'+setId+'_Day_ID',setDay);
+		_updateElement('value_date_'+setId+'_Month_ID',setMonth);
+		_updateElement('value_date_'+setId+'_Year_ID',setYear);
+		document.getElementById('target_num').value = setId;
+		document.getElementById('ch_userstipid').value = setStipnum;
+	}
+	
+	function addRow(mode,userid,fullname,rank) {
+		var tbl = document.getElementById('route_individual');
+		var lastRow = tbl.rows.length;
+		var row = tbl.insertRow(lastRow);
+		row.id = 'route_individual_row_'+lastRow;
+		
+		var cell = row.insertCell(0);
+		cell.setAttribute('width','50');
+		//cell.setAttribute('class','bgcolor_table_head');
+		cell.className = 'bgcolor_table_head';
+		
+		var text = document.createTextNode(statusLabels[mode]);
+		cell.appendChild(text);
+		
+		var cell = row.insertCell(1);
+		if(rowMod == 0) {
+			//cell.setAttribute('class','bgcolor_table');
+			cell.className = 'bgcolor_table';
+			rowMod = 1;
+		} else {
+			//cell.setAttribute('class','bgcolor_white');
+			cell.className = 'bgcolor_white';
+			rowMod = 0;
+		}
+		
+		var text = document.createTextNode(fullname);
+		cell.appendChild(text);
+	}
+	
+	var htmlForReplacement = { 
+		"" : ""
+		
+				
+	};
+
+	function go_back( action ) {
+		
+		var frm = document.getElementById( 'back_form' );
+		frm.action.value = action;
+		frm.submit();
+		
+	}
+
+	function go_submit() {
+		
+		var frm = document.getElementById( 'submit_form' );
+		
+		frm.submit();
+		
+	}
+
+	// 代理申請ボタンクリック時
+	function openSelectUser( applicationFormMasterId ) {
+		var url = "./?module=application_form&action=select_user&application_form_master_id=" + applicationFormMasterId;
+		var options = "width=500,height=530,toolbar=no,location=no,directories=yes,status=yes,menubar=no,scrollbars=yes,resizable=yes";
+		popup = window.open(url, "_popup", options);
+		popup.focus();
+	}
+
+	function setUserData(user_id, user_info)
+	{
+		document.getElementById("user_id").value = user_id;
+		document.getElementById("application_user_info").innerHTML = user_info;
+		doReload();
+	}
+
+
+	function replaceHtmlForReflectValue( lineNum, flgIsInit )
+	{
+		if(typeof flgIsInit == 'undefined'){
+			flgIsInit = false;
+		}
+		try {
+			var selectBox = document.getElementById( 'reflect_item_names_' + lineNum );
+			var selectIndex = selectBox.selectedIndex;
+			var itemId = selectBox[selectBox.selectedIndex].value;
+			var fixedNode = document.getElementById( 'fixed' + lineNum );
+			var unfixedNode = document.getElementById( 'unfixed' + lineNum );
+	
+			if ( htmlForReplacement[itemId] != null )
+			{
+				tmp = htmlForReplacement[itemId];
+				tmp = tmp.replace(/\*REPLACE\*/g, lineNum);
+				fixedNode.innerHTML = '<br/>固定値：'+ tmp;
+				fixedNode.style.display = '';
+				unfixedNode.style.display = 'none';
+			}
+			else
+			{
+				fixedNode.style.display = 'none';
+				unfixedNode.style.display = '';
+			}
+			if(!flgIsInit) {
+				hasChanged();
+			}
+		} catch(e) {}
+	}
+
+
+	function replaceAllHtmlForReflectValue()
+	{
+		var i=1;
+		for(i=1; i<1000; i++)
+		{
+			var lineNum = i;
+			if ( lineNum < 10 )
+				lineNum = '00' + lineNum;
+			else if ( lineNum < 100 )
+				lineNum = '0' + lineNum;
+
+			var selectBox = document.getElementById( 'reflect_item_names_' + lineNum );
+			if ( selectBox == null )
+				return;
+
+			replaceHtmlForReflectValue( lineNum, true );
+		}
+	}
+
+
+	function deleteUnnecessaryPostData()
+	{
+		var i=1;
+		for(i=1; i<1000; i++)
+		{
+			var lineNum = i;
+			if ( lineNum < 10 )
+				lineNum = '00' + lineNum;
+			else if ( lineNum < 100 )
+				lineNum = '0' + lineNum;
+
+			var fixedNode = document.getElementById( 'fixed' + lineNum );
+			var unfixedNode = document.getElementById( 'unfixed' + lineNum );
+			if ( fixedNode == null )
+				return;
+
+			if ( fixedNode.style.display == 'none' )
+				fixedNode.innerHTML = "";
+
+			if ( unfixedNode.style.display == 'none' )
+				unfixedNode.innerHTML = "";
+		}
+	}
+
+	function swapDisplay(id) {
+		try {
+			var val = document.getElementById(id).style.display;
+			
+			if (val == 'none') {
+				swpVal = 'inline';
+			} else {
+				swpVal = 'none';
+			}
+			
+			document.getElementById(id).style.display = swpVal;
+		} catch(e) {}
+	}
+
+	function swapDisplayAll(prefix, max) {
+		
+		var i;
+		for (i=1; i<=max; i++) {
+			swapDisplay(prefix + i);
+		}
+		
+	}
+
+	function openTimeSheet(userId,year,month,day,lineNum) {
+				var i;
+		var marklist = '';
+				var kjb = document.getElementById('lbl_disp_reflect_date').checked;
+		var linePrf = '';
+		if(!kjb) {
+			if(lineNum < 10) {
+				linePrf = '00';
+			} else {
+				linePrf = '0';
+			}
+			year = document.getElementById('value_date_'+linePrf+lineNum+'_Year_ID').value;
+			month = document.getElementById('value_date_'+linePrf+lineNum+'_Month_ID').value;
+			day = document.getElementById('value_date_'+linePrf+lineNum+'_Day_ID').value;
+		}
+				for(i=1;i<=10;i++) {
+			if(i < 10) {
+				linePrf = '00';
+			} else {
+				linePrf = '0';
+			}
+			try {
+								if(kjb) {
+					var elmprefix = 'application_reflect_date_'+linePrf;
+				} else {
+					var elmprefix = 'value_date_'+linePrf;
+				}
+								var elm = document.getElementById(elmprefix+i+'_Year_ID');
+				if(elm !== null) {
+					var year2 = elm.value;
+					var month2 = document.getElementById(elmprefix+i+'_Month_ID').value;
+					var day2 = document.getElementById(elmprefix+i+'_Day_ID').value;
+					var date = year2+'-'+padDigits(month2,2)+'-'+padDigits(day2,2);
+					marklist += date+',';
+				}
+			} catch(e){}
+		}
+				
+					var tab_num = 0;
+			var total = 0;
+				
+		var url = "./?module=application_form&action=browse_timesheet" + "&user_id=" + userId+ "&year=" + year + "&month=" +month+"&day=" +day+ "&linenum=" +lineNum + '&markdays='+marklist + '&tab_num='+tab_num + '&total='+total;
+		var options = "width=900,height=530,toolbar=no,location=no,directories=yes,status=yes,menubar=no,scrollbars=yes,resizable=yes";
+		popup = window.open(url, "_popup", options);
+		popup.focus();
+		return false;
+	}
+	
+	function openIndividualSelect(userId,routeId) {
+		var browse = 0;
+		
+		var url = "./?module=application_form&action=select_individuals" + "&user_id=" + userId + "&route_id=" + routeId + "&browse=" + browse;
+		var options = "width=700,height=530,toolbar=no,location=no,directories=yes,status=yes,menubar=no,scrollbars=yes,resizable=yes";
+		popup = window.open(url, "_popup", options);
+		popup.focus();
+	}
+	
+	function doReload() {
+		var frm = document.getElementById( 'submit_form' );
+		frm.forcereload.value='1';
+		frm.action.value = 'editor';
+		frm.submit();
+	}
+	
+	function popupClosedEvent() {
+	}
+	
+	function postbackReceived(line,vYear,vMonth,vDay) {
+	
+	}
+	
+	function finalSubmit() {
+		var frm = document.getElementById('submit_form');
+		var cnf = document.getElementById('cnt_btn');
+		
+		cnf.disabled = true;
+		frm.submit();
+	}
+	function simpleSubmit() {
+		var frm = document.getElementById('submit_form');
+		frm.submit();
+	}
+	function doEntry(ptrRef) {
+		if(yrz2FwIsOperationAllowed()){
+			ptrRef.form.action.value='update';
+			deleteUnnecessaryPostData();
+			finalSubmit();
+		}
+		return false;
+	}
+	function doDelete(ptrRef) {
+		if(yrz2FwIsOperationAllowed()){
+			ptrRef.form.action.value='delete';
+			finalSubmit();
+		}
+		return false;
+	}
+	function doAddLine(ptrRef) {
+		if(yrz2FwIsOperationAllowed()){
+			ptrRef.form.scrollbody.value=getScrollPosition();
+			ptrRef.form.action.value='editor';
+			ptrRef.form.status.value='add,default';
+			deleteUnnecessaryPostData();
+			simpleSubmit();
+		}
+		return false;
+	}
+	function doDeleteLine(ptrRef,strLine) {
+		if(yrz2FwIsOperationAllowed()){
+			ptrRef.form.scrollbody.value=getScrollPosition();
+			ptrRef.form.action.value='editor';
+			ptrRef.form.status.value='delete,default';
+			ptrRef.form.rank.value=strLine;
+			deleteUnnecessaryPostData();
+			simpleSubmit();
+		}
+		return false;
+	}
+	function doBack(ptrRef) {
+		if(yrz2FwIsOperationAllowed()){
+			ptrRef.form.action.value=''
+			simpleSubmit();
+		}
+		return false;
+	}
+	function doSelfSeal(ptrRef) {
+		if(yrz2FwIsOperationAllowed()){
+			ptrRef.form.scrollbody.value=getScrollPosition();
+			ptrRef.form.action.value='seal';
+			ptrRef.form.submit();
+		}
+		return false;
+	}
+	function doSelfSealCancel(ptrRef) {
+		if(yrz2FwIsOperationAllowed()){
+			ptrRef.form.scrollbody.value=getScrollPosition();
+			ptrRef.form.entry.value='1';
+			ptrRef.form.action.value='seal_cancel';
+			ptrRef.form.submit();
+		}
+		return false;
+	}
+	function doAddComment(ptrRef) {
+		var flgConfirmed = true;
+		if(isChanged) {
+			flgConfirmed = confirm("現在画面に表示されている内容は保存されていません、現在の内容を破棄しますか？");
+		}
+		if(flgConfirmed) {
+			if(yrz2FwIsOperationAllowed()){
+				ptrRef.form.scrollbody.value=getScrollPosition();
+				ptrRef.form.action.value='add_comment';
+				ptrRef.form.submit();
+			}
+		}
+		return false;
+	}
+
+function changeMaxView(){
+	document.form1.submit();
+}
+
+function setAndSubmitPagination(formName, fieldContent) {
+	var flgPostOK = true;
+	if(typeof(yrz2PaginationCallback) !== 'undefined') {
+		flgPostOK = yrz2PaginationCallback();
+	}
+	if(flgPostOK) {
+		setPaginationPage(formName, fieldContent);
+		submitForm(formName);
+	}
+}
+
+function setPaginationPage(formName, fieldContent) {
+	form = document.getElementById(formName);
+	form.page.value = fieldContent;
+}
+function submitForm(formName) {
+	form = document.getElementById(formName);
+	form.submit();
+}
+
+function encodeURL(str) {
+  var character = '';
+  var unicode   = '';
+  var string    = '';
+  var i         = 0;
+
+  for (i = 0; i < str.length; i++) {
+    character = str.charAt(i);
+    unicode   = str.charCodeAt(i);
+
+    if (character == ' ') {
+      string += '+';
+    } else {
+      if (unicode == 0x2a || unicode == 0x2d || unicode == 0x2e || unicode == 0x5f || ((unicode >= 0x30) && (unicode <= 0x39)) || ((unicode >= 0x41) && (unicode <= 0x5a)) || ((unicode >= 0x61) && (unicode <= 0x7a))) {
+        string = string + character;
+      } else {
+        if ((unicode >= 0x0) && (unicode <= 0x7f)) {
+          character   = '0' + unicode.toString(16);
+          string += '%' + character.substr(character.length - 2);
+        } else if (unicode > 0x1fffff) {
+          string += '%' + (oxf0 + ((unicode & 0x1c0000) >> 18)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0x3f000) >> 12)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0xfc0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        } else if (unicode > 0x7ff) {
+          string += '%' + (0xe0 + ((unicode & 0xf000) >> 12)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0xfc0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        } else {
+          string += '%' + (0xc0 + ((unicode & 0x7c0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        }
+      }
+    }
+  }
+
+  return string;
+}
+
+function getText( element ) {
+  if( element.textContent ) {
+    return element.textContent;
+  } else if( element.innerText ) {
+    return element.innerText;
+  } else {
+    return '';
+  }
+}
+
+function getNodeValue( element ) {
+  if ( element.childNodes.length ) {
+    return element.childNodes[0].nodeValue
+  } else {
+    return '';
+  }
+}
+
+function changeText(where, what) {
+  if (document.getElementById) {
+    document.getElementById(where).innerHTML = what;
+  } else if (document.all) {
+    document.all[where].innerHTML = what;
+  }
+}
+function addText(where, what) {
+  if (document.getElementById) {
+    document.getElementById(where).innerHTML += '<br>';
+    document.getElementById(where).innerHTML += what;
+  } else if (document.all) {
+    document.all[where].innerHTML += '<br>';
+    document.all[where].innerHTML += what;
+  }
+}
+
+myFlg = 0;
+function blinkText(where, what, alt, interval){
+
+	setInterval(
+		function(){
+			if (myFlg == 0){
+				changeText(where, what);
+				myFlg = 1;
+			}else{
+				changeText(where, alt);
+				myFlg = 0;
+			}
+		}
+	, interval);
+}
+
+function saveScrollPosition(xname,yname) {
+	if(xname != null) {
+		document.getElementById(xname).value = getScrollPosX();
+	}
+	if(yname != null) {
+		document.getElementById(yname).value = getScrollPosY();
+	}
+}
+function getScrollPosX() {
+	var scrollX = 0;
+	switch(navigator.appName) {
+		case 'Microsoft Internet Explorer':
+			if(document.documentElement && document.documentElement.scrollLeft){
+				scrollX = document.documentElement.scrollLeft;
+			} else {
+				scrollX = document.body.scrollLeft;
+			}
+			break;
+		default:
+			scrollX = window.pageXOffset;
+			break;
+	}
+	return scrollX;
+}
+function getScrollPosY() {
+	return getScrollPosition();
+}
+function getScrollPosition() {
+	var scrollY = 0;
+	switch(navigator.appName) {
+		case 'Microsoft Internet Explorer':
+			if(document.documentElement && document.documentElement.scrollTop){
+				scrollY = document.documentElement.scrollTop;
+			} else {
+				scrollY = document.body.scrollTop;
+			}
+			break;
+		default:
+			scrollY = window.pageYOffset;
+			break;
+	}
+	return scrollY;
+}
+function scrollBodyXY( xpos,ypos ) {
+	window.scrollBy(xpos,ypos);
+}
+function scrollBody( ypos ) {
+	window.scrollBy(0,ypos);
+}
+
+function padDigits(n, totalDigits) {
+	n = n.toString(); 
+	var pd = ''; 
+	if (totalDigits > n.length) {
+		for (i=0; i < (totalDigits-n.length); i++) {
+			pd += '0';
+		}
+	}
+	return pd + n.toString();
+}
+function getElementX(obj) {
+	var pos = getElementPos(obj);
+	return pos[0];
+}
+
+function getElementY(obj) {
+	var pos = getElementPos(obj);
+	return pos[1];
+}
+function getElementPos(cobj){
+	var clft=cobj.offsetLeft;
+	var ctop=cobj.offsetTop;
+	while(cobj.offsetParent!=null){
+		var cpar=cobj.offsetParent;
+		clft+=cpar.offsetLeft;
+		ctop+=cpar.offsetTop;
+		cobj=cpar;
+	}
+	return [clft,ctop];
+}
+
+function urldecode( str ) {
+	var histogram = {}, histogram_r = {}, e = 0, str_tmp = [];
+	var ret = str.toString();
+	
+	var replacer = function(search, replace, str) {
+		var tmp_arr = [];
+		tmp_arr = str.split(search);
+		return tmp_arr.join(replace);
+	};
+	
+	histogram['!']   = '%21';
+	histogram['%20'] = '+';
+	
+	for (replace in histogram) {
+		search = histogram[replace];
+		ret = replacer(search, replace, ret);
+	}
+	
+	ret = decodeURIComponent(ret);
+	return ret;
+}
+
+function setTransparency(d,val){
+	var f=d.style;
+	if("opacity"in f) {
+		f.opacity=val;
+	} else if("MozOpacity"in f) {
+		f.MozOpacity=val;
+	} else if("filter"in f) {
+		var val = val * 100;
+		f.filter="alpha(opacity="+val+")";
+	}
+}
+
+function yrz2FwDisableOnProcessing() {
+	var domObj = document.getElementById('loadingRotatorFS');
+	domObj.style.display = '';
+}
+
+var yrz2FwIsOperationAllowedFlag = true;
+var yrz2FwIsMessageDisplayed = false;
+function yrz2FwMessageSetText(hdr,cnt,pos) {
+	var halign="center";
+	var valign="middle";
+	if(pos != undefined) {
+	}
+	
+	var domObj = document.getElementById('yrz2MessagePopup');
+	domObj.innerHTML = "\
+<table width='100%' height='100%'>\
+<tr valign='"+valign+"'><td align='"+halign+"'>\
+<table width='300px' class='border_gray_1px' cellpadding='0' cellspacing='0'>\
+<tr class='bgcolor_table_head'><td class='txt_12' align='center'>\
+<b>"+hdr+"<\/b>\
+<\/td><\/tr><tr><td class='txt_12' align='center'>\
+<br\/>"+cnt+"<br\/><br\/>\
+<\/td><\/tr>\
+<\/table>\
+<\/td>\
+<\/tr>\
+<\/table>";
+}
+function yrz2FwMessageDisplay() {
+	if(yrz2FwIsMessageDisplayed == false) {
+		yrz2FwIsMessageDisplayed = true;
+		var domObj = document.getElementById('yrz2MessagePopup');
+		domObj.style.display = '';
+		return true;
+	} else {
+		return false;
+	}
+}
+function yrz2FwMessageHide() {
+	var domObj = document.getElementById('yrz2MessagePopup');
+	domObj.style.display = 'none';
+}
+function yrz2FwDisplayInOperation(mde) {
+	if(mde==undefined | mde==0) {
+		yrz2FwMessageSetText("システムメッセージ","処理中です。もうしばらくお待ち下さい。");
+		setTimeout(function(){yrz2FwDisplayInOperation(1)},50);
+	} else {
+		if(!yrz2FwMessageDisplay()) {
+			setTimeout(function(){yrz2FwDisplayInOperation(1)},1000);
+		}
+	}
+}
+function yrz2FwIsOperationAllowed(dsptim) {
+	if(yrz2FwIsOperationAllowedFlag == true) {
+		yrz2FwIsOperationAllowedFlag = false;
+		if(dsptim != undefined) {
+			setTimeout(function(){yrz2FwDisplayInOperation(0)},dsptim*1000);
+		}
+		return true;
+	}
+	return false;
+}
+function yrz2FwResetOperationAllowedFlag() {
+	yrz2FwIsOperationAllowedFlag = true;
+}
+
+function yrz2FwDecodeHtmlSpecialChars (string, quote_style) {
+	var optTemp = 0;
+	var noquotes = false;
+	
+	if (typeof quote_style === 'undefined') {
+		quote_style = 2;
+	}
+	var OPTS = {
+		'ENT_NOQUOTES': 0,
+		'ENT_HTML_QUOTE_SINGLE': 1,
+		'ENT_HTML_QUOTE_DOUBLE': 2,
+		'ENT_COMPAT': 2,
+		'ENT_QUOTES': 3,
+		'ENT_IGNORE': 4,
+		'ENT_NOBRACKETS': 8,
+		'ENT_NOAMPERSAND': 16
+	};
+	if (quote_style === 0) {
+		noquotes = true;
+	}
+	if (typeof quote_style !== 'number') {
+		quote_style = [].concat(quote_style);
+		var i = 0;
+		for (i = 0; i < quote_style.length; i++) {
+			if (OPTS[quote_style[i]] === 0) {
+				noquotes = true;
+			} else if (OPTS[quote_style[i]]) {
+				optTemp = optTemp | OPTS[quote_style[i]];
+			}
+		}
+		quote_style = optTemp;
+	}
+	if (!(quote_style & OPTS.ENT_NOBRACKETS)) {
+		string = string.toString().replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+	}
+	if (quote_style & OPTS.ENT_HTML_QUOTE_SINGLE) {
+		string = string.replace(/&#0*39;/g, "'"); // PHP doesn't currently escape if more than one 0, but it should
+		// string = string.replace(/&apos;|&#x0*27;/g, "'"); // This would also be useful here, but not a part of PHP
+	}
+	if (!noquotes) {
+		string = string.replace(/&quot;/g, '"');
+	}
+	if(!(quote_style & OPTS.ENT_NOAMPERSAND)) {
+		string = string.replace(/&amp;/g, '&');
+	}
+	return string;
+}
+
+function yrz2UpdateAndDoAction(_elementName,_cookieName,_obj,_action){
+	if ( typeof _elementName!='undefined' && typeof (_cookieName)!='undefined'){
+		yrz2UpdateCookie(_elementName,_cookieName);
+		if ( typeof _action!='undefined' ){
+			yrz2DoAction(_obj,_action);
+		}
+	}
+}
+
+function yrz2UpdateCookie(_elementName,_cookieName){
+	if (typeof (_elementName)!='undefined' ){
+		var name = document.getElementsByName(_elementName);
+		if ( typeof(name[0])!='undefined' ){
+			setCookie( _cookieName, name[0].options[name[0].selectedIndex].value );
+		} else {
+			setCookie( _cookieName, -1 );
+		}
+	}
+}
+
+function yrz2DoAction(_obj,_action){
+	if(typeof(_obj) != 'undefined'){
+		if(typeof(_action) != 'undefined'){
+			if (_action=='submit'){
+				_obj.submit();
+			} else {
+				_obj.location.href = _action;
+			}
+		} 
+	}
+}
+
+
+
+		-->
+	</script>
+</head>
+<body >
+<!-- ヘッダー -->
+<div id="header">
+	<div id="header_bar">
+				<table width="100%" style="height:54px;" border="0" cellpadding="0" cellspacing="0" class="header_bg">
+			<tr>
+				<td width="20"><img src="common/images/spacer.gif" alt="" width="20" height="1" /></td>
+				<td width="106"><a href="./"><img src="common/img_default/00_top_header_logo_kin.gif" alt="万屋一家" height="39" border="0" /></a></td>
+				<td width="20"><img src="common/images/spacer.gif" alt="" width="20" height="1" /></td>
+				<td valign="top">
+					<div id="user">
+						<div class="user_name">サンプル株式会社 第一チーム 勤野 助太郎さん</div>
+ 
+						<div class="user_login">前回ログイン：2017-01-25 20:42:12</div>
+					
+					</div>
+				</td>
+				<td width="10">
+					<img src="common/images/spacer.gif" alt="" width="10" height="1" />
+				</td>
+				<td align="right" valign="middle">
+					<noscript><span class="user_name">※JavaScript を有効にしてください。　<br/></span></noscript>
+														</td>
+				<td align="right" valign="top"><div id="headr_form" class="txt_12_2">
+						<script type="text/JavaScript">
+						<!--
+						function MM_jumpMenu(targ,selObj,restore){ //v3.0
+							if ( selObj.options[selObj.selectedIndex].value == 'ja' ) {
+								setCookie( "language", 'ja' );
+								location.reload();
+							} else if ( selObj.options[selObj.selectedIndex].value == 'en' ) {
+								setCookie( "language", 'en' );
+								location.reload();
+							} else {
+								eval(targ+".location='"+selObj.options[selObj.selectedIndex].value+"'");
+								if (restore) selObj.selectedIndex=0;
+							}
+						}
+						function setCookie( key, val, tmp ){
+							tmp = key + "=" + escape(val) + "; ";
+							// tmp += "path=" + location.pathname + "; ";
+							// tmp += "expires=Tue, 31-Dec-2030 23:59:59; ";
+							document.cookie = tmp;
+						}
+
+						-->
+						</script>
+						<form method="post" action="./">
+							<select name="kihon_settei" size="1" onchange="MM_jumpMenu('parent',this,1)">
+								<option value="#" selected="selected">（各種基本設定）</option>
+								<option value="./?module=menu&amp;action=lineup">メニューリスト</option>
+								<option value="./?module=individual&amp;action=toppage">個人設定</option>
+								<option value="./?module=manual&amp;action=manual">操作ガイド</option>
+														</select>
+							<input type="submit" name="logout" value="ログアウト" />
+							<input type="hidden" name="module" value="logout" />
+						</form>
+					</div>
+				</td>
+				<td width="20">
+					<img src="common/images/spacer.gif" alt="" width="20" height="1" />
+				</td>
+			</tr>
+		</table>
+	</div>
+	<!-- アイコンメニュー -->
+			<div id="header_menu">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="header_menu_bgcolor">
+				<tr>
+					<td align="left" class="header_menu_padding">
+						<table border="0" cellpadding="0" cellspacing="0">
+							<tr>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=timesheet&amp;action=browse">
+											<img src="common/img_icon/main_icon_Syukkinbo.gif" alt="出勤簿" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=application_form&amp;action=application_form">
+											<img src="common/img_icon/main_icon_KakusyuShinsei.gif" alt="各種申請" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=vacation_history&amp;action=vacation_history">
+											<img src="common/img_icon/main_icon_KyuukaRireki.gif" alt="休暇履歴" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke/payslip&amp;action=yonosuke/payslip">
+											<img src="common/img_icon/main_icon_KyuuyoMeisaisyo.gif" alt="給与明細書" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke_closing/taxwithholdingslip&amp;action=yonosuke_closing/taxwithholdingslip">
+											<img src="common/img_icon/main_icon_GensenCyousyuuhyo.gif" alt="源泉徴収票" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+															</tr>
+							<tr class="txt_10_2_center">
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=timesheet&amp;action=browse">
+											出勤簿
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=application_form&amp;action=application_form">
+											各種申請
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=vacation_history&amp;action=vacation_history">
+											休暇履歴
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke/payslip&amp;action=yonosuke/payslip">
+											給与<br />明細書
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke_closing/taxwithholdingslip&amp;action=yonosuke_closing/taxwithholdingslip">
+											源泉<br />徴収票
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+															</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+<!-- /ヘッダー -->
+<table width="100%">
+	<tr>
+		<td width="120" align="center" valign="top">
+
+		</td>
+		<td align="center" valign="top">
+
+<!-- コンテンツ -->
+<div id="wrapper_main" align="center">
+	<!-- コンテンツエリアはデフォルトで　W=720px, H=550px以上 -->
+	<table width="720" height="550" border="0" cellpadding="0" cellspacing="0" id="main_table">
+		<tr>
+			<td align="center" valign="top">
+				<div id="main_header_area">
+					<table width="720" border="0" cellpadding="0" cellspacing="0" class="main_header_bg">
+						<tr>
+							<td width="100" rowspan="2" align="center" valign="top">
+								<img src="common/img_icon/main_icon_KakusyuShinsei.gif" alt="" width="59" height="56" />
+							</td>
+							<td align="left" valign="top" class="main_header">
+								<span class="main_header_small"><a href="./">トップページ</a> &gt; </span>各種申請</td>
+						</tr>
+						<tr>
+							<td align="left" valign="top">
+								<div id="header_tab_menu"></div>
+							</td>
+						</tr>
+					</table>
+				</div>
+
+
+					<table width="700" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td>
+								<form method="POST" action="./" id="submit_form"> <input type="hidden" name="__sectag_8a943f386420a98602286b1ed97c659b" value="cd63f9016539c04a13a512f0a081c299cadb835e6d1b68b5b1e23087ea0b3437"/><input type="hidden" name="__sectbi" value="c58f7f1e523d93734486d74e8d62cf10"/>
+									<input type="hidden" name="entry" value="0"/>
+									<input type="hidden" name="forcereload" value="0"/>
+									<input type="hidden" name="scrollbody" id="scrollbody" value="0"/>
+									<input type="hidden" name="target_num" id="target_num" value="" />
+									<input type="hidden" name="ch_userstipid" id="ch_userstipid" value="" />
+									
+
+									<div class="bottom_10" align="center">
+										<table width="75%" border="0" cellpadding="10" cellspacing="1" class="txt_12">
+											<tr class="bgcolor_table_head" align="left">
+												<td width="80">申請書類</td>
+												<td class="bgcolor_table">
+													残業申請*
+																																																																</td>
+												<td width="80">申請者</td>
+												<td class="bgcolor_table">
+													<span id="application_user_info">
+													KN012345　勤野　助太郎
+													</span>
+												</td>
+											</tr>
+										</table>
+																			<div align="center" class="top_3">
+											<table width="75%" border="0" cellspacing="0" cellpadding="0" class="txt_10">
+												<tr>
+													<td align="left">&nbsp;</td>
+													<td align="right">
+														<input type="button" value="代理申請" class="txt_12_black" onClick="openSelectUser(122)" />
+													</td>
+												</tr>
+											</table>
+										</div>
+																		</div>
+									<div align="center">
+										<table width="75%" border="0" cellpadding="10" cellspacing="1" class="txt_12">
+																						<tr class="bgcolor_table_head" align="left">
+												<td>申請理由</td>
+												<td class="bgcolor_table">
+																							<textarea name="application_remarks" cols="24" rows="2" class="text_area_txt12black_2" style="height:4.5em;" onchange="javascript:hasChanged();"></textarea>
+																							</td>
+											</tr>
+											<tr class="bgcolor_table_head" align="left">
+												<td>承認経路</td>
+												<td class="bgcolor_white">
+												
+<select id="application_route_master_id" name="application_route_master_id" onchange="javascript:routeChanged();">
+						<option label="リーダ決済" value="10"
+			>
+			リーダ決済
+		</option>
+							<option label="マネージャー決済" value="1"
+			>
+			マネージャー決済
+		</option>
+							<option label="室長・事業部長決済" value="2"
+			selected>
+			室長・事業部長決済
+		</option>
+							<option label="人事決済" value="5"
+			>
+			人事決済
+		</option>
+							<option label="副事業部長・室長" value="14"
+			>
+			副事業部長・室長
+		</option>
+	</select>
+<input type="button" value="承認者表示" onclick="javascript:openIndividualSelect(document.getElementById('user_id').value,document.getElementById('application_route_master_id').value);"/>
+<div id="toggle_view" style="display:none">
+<br/>
+<table border="0" cellspacing="0" cellpadding="0" id="route_individual">
+</table>
+
+</div>
+																								</td>
+											</tr>
+<tr class="bgcolor_table_head" align="left">
+												<td>申請内容</td>
+												<td class="bgcolor_table">
+																									
+																																							<div width="100%" align="right">
+															<input type="checkbox" name="disp_reflect_date" value="1" id="lbl_disp_reflect_date" onclick="javascript:swapDisplayAll('reflect_date_select',10);swapDisplayAll('reflect_date_select_br',10);swapDisplayAll('reflect_date_delete_br',10);">
+															<label for="lbl_disp_reflect_date">計上日を表示する</label>
+														</div>
+																																							<table width="100%">
+
+
+
+																			<tbody><tr>
+																<td>
+																																										<div id="reflect_date_select1" style="display:none;">
+																																											<select name="application_reflect_date_001_Year" id="application_reflect_date_001_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_001_Month" id="application_reflect_date_001_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_001_Day"> <select name="application_reflect_date_001_Day" id="application_reflect_date_001_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26" selected="selected">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_001" id="reflect_item_names_001" onchange="javascript:replaceHtmlForReflectValue('001');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed001">
+																																																					<select name="value_date_001_Year" id="value_date_001_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_001_Month" id="value_date_001_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_001_Day"> <select name="value_date_001_Day" id="value_date_001_Day_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_001_Hour" onchange="javascript:hasChanged();">
+<option value="00" selected="selected">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_001_Minute" onchange="javascript:hasChanged();">
+<option value="00" selected="selected">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed001" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_001_Year.value,this.form.application_reflect_date_001_Month.value,this.form.application_reflect_date_001_Day.value,1)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'001'));">
+																																							<br>
+																											<div id="reflect_date_delete_br1" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select2" style="display:none;">
+																																											<select name="application_reflect_date_002_Year" id="application_reflect_date_002_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_002_Month" id="application_reflect_date_002_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_002_Day"> <select name="application_reflect_date_002_Day" id="application_reflect_date_002_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02" selected="selected">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_002" id="reflect_item_names_002" onchange="javascript:replaceHtmlForReflectValue('002');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed002">
+																																																					<select name="value_date_002_Year" id="value_date_002_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_002_Month" id="value_date_002_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_002_Day"> <select name="value_date_002_Day" id="value_date_002_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02" selected="selected">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_002_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_002_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed002" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_002_Year.value,this.form.application_reflect_date_002_Month.value,this.form.application_reflect_date_002_Day.value,2)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'002'));">
+																																							<br>
+																											<div id="reflect_date_delete_br2" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select3" style="display:none;">
+																																											<select name="application_reflect_date_003_Year" id="application_reflect_date_003_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_003_Month" id="application_reflect_date_003_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_003_Day"> <select name="application_reflect_date_003_Day" id="application_reflect_date_003_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03" selected="selected">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_003" id="reflect_item_names_003" onchange="javascript:replaceHtmlForReflectValue('003');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed003">
+																																																					<select name="value_date_003_Year" id="value_date_003_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_003_Month" id="value_date_003_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_003_Day"> <select name="value_date_003_Day" id="value_date_003_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03" selected="selected">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_003_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_003_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed003" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_003_Year.value,this.form.application_reflect_date_003_Month.value,this.form.application_reflect_date_003_Day.value,3)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'003'));">
+																																							<br>
+																											<div id="reflect_date_delete_br3" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select4" style="display:none;">
+																																											<select name="application_reflect_date_004_Year" id="application_reflect_date_004_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_004_Month" id="application_reflect_date_004_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_004_Day"> <select name="application_reflect_date_004_Day" id="application_reflect_date_004_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04" selected="selected">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_004" id="reflect_item_names_004" onchange="javascript:replaceHtmlForReflectValue('004');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed004">
+																																																					<select name="value_date_004_Year" id="value_date_004_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_004_Month" id="value_date_004_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_004_Day"> <select name="value_date_004_Day" id="value_date_004_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04" selected="selected">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_004_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_004_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed004" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_004_Year.value,this.form.application_reflect_date_004_Month.value,this.form.application_reflect_date_004_Day.value,4)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'004'));">
+																																							<br>
+																											<div id="reflect_date_delete_br4" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select5" style="display:none;">
+																																											<select name="application_reflect_date_005_Year" id="application_reflect_date_005_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_005_Month" id="application_reflect_date_005_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_005_Day"> <select name="application_reflect_date_005_Day" id="application_reflect_date_005_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05" selected="selected">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_005" id="reflect_item_names_005" onchange="javascript:replaceHtmlForReflectValue('005');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed005">
+																																																					<select name="value_date_005_Year" id="value_date_005_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_005_Month" id="value_date_005_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_005_Day"> <select name="value_date_005_Day" id="value_date_005_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05" selected="selected">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_005_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_005_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed005" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_005_Year.value,this.form.application_reflect_date_005_Month.value,this.form.application_reflect_date_005_Day.value,5)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'005'));">
+																																							<br>
+																											<div id="reflect_date_delete_br5" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select6" style="display:none;">
+																																											<select name="application_reflect_date_006_Year" id="application_reflect_date_006_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_006_Month" id="application_reflect_date_006_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_006_Day"> <select name="application_reflect_date_006_Day" id="application_reflect_date_006_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06" selected="selected">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_006" id="reflect_item_names_006" onchange="javascript:replaceHtmlForReflectValue('006');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed006">
+																																																					<select name="value_date_006_Year" id="value_date_006_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_006_Month" id="value_date_006_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_006_Day"> <select name="value_date_006_Day" id="value_date_006_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06" selected="selected">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_006_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_006_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed006" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_006_Year.value,this.form.application_reflect_date_006_Month.value,this.form.application_reflect_date_006_Day.value,6)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'006'));">
+																																							<br>
+																											<div id="reflect_date_delete_br6" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select7" style="display:none;">
+																																											<select name="application_reflect_date_007_Year" id="application_reflect_date_007_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_007_Month" id="application_reflect_date_007_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_007_Day"> <select name="application_reflect_date_007_Day" id="application_reflect_date_007_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07" selected="selected">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_007" id="reflect_item_names_007" onchange="javascript:replaceHtmlForReflectValue('007');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed007">
+																																																					<select name="value_date_007_Year" id="value_date_007_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_007_Month" id="value_date_007_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_007_Day"> <select name="value_date_007_Day" id="value_date_007_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07" selected="selected">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_007_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_007_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed007" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_007_Year.value,this.form.application_reflect_date_007_Month.value,this.form.application_reflect_date_007_Day.value,7)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'007'));">
+																																							<br>
+																											<div id="reflect_date_delete_br7" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select8" style="display:none;">
+																																											<select name="application_reflect_date_008_Year" id="application_reflect_date_008_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_008_Month" id="application_reflect_date_008_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_008_Day"> <select name="application_reflect_date_008_Day" id="application_reflect_date_008_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08" selected="selected">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_008" id="reflect_item_names_008" onchange="javascript:replaceHtmlForReflectValue('008');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed008">
+																																																					<select name="value_date_008_Year" id="value_date_008_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_008_Month" id="value_date_008_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_008_Day"> <select name="value_date_008_Day" id="value_date_008_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08" selected="selected">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_008_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_008_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed008" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_008_Year.value,this.form.application_reflect_date_008_Month.value,this.form.application_reflect_date_008_Day.value,8)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'008'));">
+																																							<br>
+																											<div id="reflect_date_delete_br8" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																			<tr>
+																<td>
+																																										<div id="reflect_date_select9" style="display:none;">
+																																											<select name="application_reflect_date_009_Year" id="application_reflect_date_009_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_009_Month" id="application_reflect_date_009_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_009_Day"> <select name="application_reflect_date_009_Day" id="application_reflect_date_009_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09" selected="selected">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_009" id="reflect_item_names_009" onchange="javascript:replaceHtmlForReflectValue('009');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152" selected="">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed009">
+																																																					<select name="value_date_009_Year" id="value_date_009_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_009_Month" id="value_date_009_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_009_Day"> <select name="value_date_009_Day" id="value_date_009_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09" selected="selected">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_009_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_009_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed009" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_009_Year.value,this.form.application_reflect_date_009_Month.value,this.form.application_reflect_date_009_Day.value,9)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'009'));">
+																																							<br>
+																											<div id="reflect_date_delete_br9" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+
+
+																		<tr>
+																<td>
+																																										<div id="reflect_date_select10" style="display:none;">
+																																											<select name="application_reflect_date_010_Year" id="application_reflect_date_010_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="application_reflect_date_010_Month" id="application_reflect_date_010_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="application_reflect_date_010_Day"> <select name="application_reflect_date_010_Day" id="application_reflect_date_010_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10" selected="selected">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																												
+																													の
+															</div>
+																											
+																																																													<select name="reflect_item_id_010" id="reflect_item_names_010" onchange="javascript:replaceHtmlForReflectValue('010');">
+																
+																																
+																																																																																																						<option label="時間外終了時刻" value="152">
+																			時間外終了時刻
+																		</option>
+																																																																																																																							<option label="時間外休憩開始" value="155">
+																			時間外休憩開始
+																		</option>
+																																																																																																																							<option label="時間外休憩終了" value="156">
+																			時間外休憩終了
+																		</option>
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													</select>
+																														：<br>																											<span id="unfixed010">
+																																																					<select name="value_date_010_Year" id="value_date_010_Year_ID" onchange="javascript:hasChanged();">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="value_date_010_Month" id="value_date_010_Month_ID" onchange="javascript:hasChanged();">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="value_date_010_Day"> <select name="value_date_010_Day" id="value_date_010_Day_ID" onchange="javascript:hasChanged();">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10" selected="selected">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+														<select name="value_time_010_Hour" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+</select>
+:
+<select name="value_time_010_Minute" onchange="javascript:hasChanged();">
+<option value="00">00</option>
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+<option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+<option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+</select>
+
+																										
+</span>
+<span id="fixed010" style="display:none;">
+</span>
+																</td>
+																<td align="right" valign="top">
+																																																						<input class="btn_ss" type="button" value="出勤簿表示" onclick="openTimeSheet(document.getElementById('user_id').value,this.form.application_reflect_date_010_Year.value,this.form.application_reflect_date_010_Month.value,this.form.application_reflect_date_010_Day.value,10)">
+																											<input class="btn_ss" type="button" value="削除" onclick="javascript:return(doDeleteLine(this,'010'));">
+																																							<br>
+																											<div id="reflect_date_delete_br10" style="display:none;">
+															<br>
+														</div>
+																													</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr color="#cccccc">
+																</td>
+															</tr>
+															<tr>
+																<td align="right" colspan="2">
+													<input type="hidden" name="user_id" id="user_id" value="3551">
+													<input type="hidden" name="status" value="default">
+													<input type="hidden" name="rank" value="">
+													<input type="hidden" name="application_form_master_id" value="122">
+													<input type="hidden" name="reflect_data_count" value="10">
+																																									<input class="btn_ss" type="button" value="追加" onclick="javascript:return(doAddLine(this));">
+																																																							</td>
+															</tr>
+														</tbody></table>
+												</td>
+											</tr>
+											<tr>
+												<td align="center">
+													<table width="75%" border="0" cellpadding="10" cellspacing="1" class="txt_12">
+													<tr>
+														<td align="right">
+																									</td>
+													</tr>
+																																																													</table>
+												</td>
+											</tr>
+										</table>
+									</div>
+																	<div class="bottom_30" align="center">
+									
+										<table width="75%" border="0" cellpadding="0" cellspacing="0" class="txt_12">
+											<tr>
+												<td colspan="2" align="center">
+													<table width="80%" border="0" cellpadding="1" cellspacing="0" class="txt_12">
+														<tr class="bgcolor_table_head">
+															<td align="center">メール配信</td>
+														</tr>
+														<tr class="bgcolor_table_head">
+															<td align="center">
+																<table width="100%" border="0" cellpadding="10" cellspacing="0" class="txt_12">
+																	<tr class="bgcolor_white">
+																		<td align="left">
+																			<div align="right" class="bottom_5">
+																				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+																					<tr align="left">
+																						<td>
+																							承認・決裁者へのメールの送信
+																						</td>
+																						<td>
+																							送信する（最初発行のみ）
+																						</td>
+																					</tr>
+																					<tr align="left">
+																						<td>
+																							承認・決裁完了メールの受信
+																						</td>
+																						<td>
+																							<select name="se_mail_delivery">
+<option label="受信しない" value="0" selected="selected">受信しない</option>
+<option label="受信する" value="1">受信する</option>
+<option label="受信する（承認時のみ）" value="2">受信する（承認時のみ）</option>
+<option label="受信する（決裁時のみ）" value="3">受信する（決裁時のみ）</option>
+</select>
+
+																						</td>
+																					</tr>
+																					<tr align="left">
+																						<td>
+																							差戻・却下時のメールの受信
+																						</td>
+																						<td>
+																							受信しない
+																						</td>
+																					</tr>
+																				</table>
+																			</div>
+																		</td>
+																	</tr>
+																</table>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</table>
+									</div>
+									<div id="btn" align="center">
+										<table width="75%" border="0" cellpadding="0" cellspacing="0" class="txt_12">
+											<tr>
+												<td colspan=2 align="right">
+																																										<input type="checkbox" name="auto_seal" value="1" id="c3"
+																																	checked
+																															>
+															<label for="c3">
+																															自動で申請捺印する
+																														</label>
+																																							</td>
+											</tr>
+											<tr>
+												<td align="left" width="50%">
+													<input type="button" value="戻る" onClick="javascript:return(doBack(this));" />
+												</td>
+												<td align="right">
+																																						<input id="cnt_btn" type="button" value="申請" onClick="javascript:return(doEntry(this));" />
+																																					</td>
+											</tr>
+										</table>
+									</div>
+
+									<input type="hidden" name="application_master_id" value="" />
+																		<input type="hidden" name="module" value="application_form" />
+									<input type="hidden" name="action" value="" />
+									<input type="hidden" name="next_action" value="browse">
+									<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+								</form>
+								<form method="POST" action="./" id="back_form"> <input type="hidden" name="__sectag_8a943f386420a98602286b1ed97c659b" value="cd63f9016539c04a13a512f0a081c299cadb835e6d1b68b5b1e23087ea0b3437"/><input type="hidden" name="__sectbi" value="c58f7f1e523d93734486d74e8d62cf10"/>
+									<input type="hidden" name="module" value="application_form" />
+									<input type="hidden" name="action" value="" />
+									<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+								</form>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+	</table>
+</div>
+
+<!-- /コンテンツ -->
+
+
+		</td>
+		<td width="120" valign="top">
+			<br />
+		</td>
+	</tr>
+</table><div id="footer" class="txt_10_2"> 
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="footer_bg">
+		<tr>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+	万屋一家シリーズ Ver. 2.1.1306.1<br />
+	Copyright &copy; 2006-2017 HOYA Service Corp. All rights reserved.<br />
+	<br/>
+	</div>
+<div id="yrz2MessagePopup" style="display:none;"></div></body>
+</html>

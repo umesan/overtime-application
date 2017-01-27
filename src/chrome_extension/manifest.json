@@ -17,18 +17,13 @@
   "permissions": [
     "tabs","contextMenus"
   ],
-  "background": {
-    "scripts": ["js/background.js"]
-  },
   "content_scripts": [
     {
       "matches": ["https://www.4628.jp/*"],
       "exclude_globs": ["*markdays=*"],
       "js": [
-        "js/jquery.min.js",
-        "js/content_script.js"
+        "content.min.js"
       ],
-      "css": ["css/app.css"],
       "run_at": "document_end"
     }
   ]

@@ -1,0 +1,2493 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>万屋一家ver.2</title>
+	<meta name="robots" content="noindex" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="pragma" content="no-cache" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+	<link rel="shortcut icon" href="common/ico/kinnosuke_icon.ico" />
+	<link type="text/css" rel="stylesheet" href="common/css/v2_common.css" />
+	<link type="text/css" rel="stylesheet" href="common/css/v2_webkit_default.css" />
+	
+	<script type="text/javascript">
+		<!--
+			
+
+var isTimer = 0;
+var colorcache = 0;
+
+function go_submit( frmId, max ) {
+	setApplicationMasterId( frmId, max );
+	var frm = document.getElementById( frmId );
+	frm.submit();
+}
+function setApplicationMasterId( frmId, max ) {
+	var cnt = 0;
+	var list = '';
+	for ( var i=1; i<=max; i++ ) {
+		var chk = document.getElementById('check_' + i);
+		if ( chk != null ) {
+			if ( chk.checked ) {
+				cnt++;
+				list = list + ',' + chk.value;
+			}
+		}
+	}
+	list = list.substr( 1, list.length );
+	var frm = document.getElementById( frmId );
+	frm.application_master_id.value = list;
+
+}
+function confirmDelete( max ) {
+	var cnt = 0;
+	var list = '';
+	for ( var i=1; i<=max; i++ ) {
+		var chk = document.getElementById('check_' + i);
+		if ( chk != null ) {
+			if ( chk.checked ) {
+				cnt++;
+				list = list + ',' + chk.value;
+			}
+		}
+	}
+	list = list.substr( 1, list.length );
+	var frm = document.getElementById('delete_form');
+	frm.application_route_master_id.value = list;
+	frm.submit();
+}
+function changeMaxView(){
+	frm.submit();
+}
+function submitScript(id, action) {
+	frm = document.getElementById(id);
+	frm.action.value = action;
+	frm.submit();
+}
+function checkAll( max ) {
+	frm_check = document.getElementById('check_all');
+	for ( i=1; i<=max; i++ ) {
+		frm = document.getElementById('check_' + i);
+		if ( frm != null  && frm.disabled == false) {
+			frm.checked = frm_check.checked;
+		}
+	}
+}
+function search_submit(){
+	var frm = document.getElementById('search_form');
+	frm.action.value='user'
+	frm.submit();
+}
+function ZeroFormat(num,max){
+	var tmp=''+num;
+	while(tmp.length<max){
+		tmp='0'+tmp;
+	}
+	return tmp;
+}
+function showPopup(e,msg) {
+	showPopupFixed(e,msg,0,0,false,false);
+}
+function showPopupFixed(e,msg,x2,y2,xoffs,yoffs) {
+	if(!document.getElementById) {
+		return;
+	}
+	var obj = document.getElementById("yrz_popup");
+	var x = e.clientX + scrollLeft();
+	var y = e.clientY + scrollTop();
+	obj.innerHTML = msg;
+	if(x2 == 0) {
+		if(xoffs == false) {
+			x = x-60;
+		} else {
+			x = x+offset;
+		}
+		obj.style.left = x + "px";
+	} else {
+		obj.style.left = x2 + "px";
+	}
+	if(y2 == 0) {
+		if(yoffs == false) {
+			y = y+16;
+		} else {
+			y = y + yoffs;
+		}
+		obj.style.top = y + "px";
+	} else {
+		obj.style.top = y2 + "px";
+	}
+	obj.style.visibility = "visible";
+}
+function closePopup() {
+	if(!document.getElementById) {
+		return;
+	}
+	var obj = document.getElementById("yrz_popup");
+	obj.style.visibility = "hidden";
+}
+function scrollLeft () {
+	if(window.pageXOffset) {
+		return window.pageXOffset;
+	}
+	if(document.compatMode == "CSS1Compat") {
+		return document.body.parentNode.scrollLeft;
+	}
+	if(document.body.scrollLeft) {
+		return document.body.scrollLeft;
+	}
+	return 0;
+}
+function scrollTop () {
+	if(window.pageYOffset) {
+		return window.pageYOffset;
+	}
+	if(document.compatMode == "CSS1Compat") {
+		return document.body.parentNode.scrollTop;
+	}
+	if(document.body.scrollTop) {
+		return document.body.scrollTop;
+	}
+	return 0;
+}
+function doSearch() {
+	if(yrz2FwIsOperationAllowed()){
+		document.getElementById('search_form').submit();
+	}
+	return false;
+}
+function doAdd(objForm) {
+	if(yrz2FwIsOperationAllowed()){
+		objForm.submit();
+	}
+	return false;
+}
+function doDelete(intMaxView) {
+	if(yrz2FwIsOperationAllowed()){
+		go_submit('delete_confirm_form',intMaxView);
+	}
+	return false;
+}
+function doSelfSeal(ptrReference) {
+	if(yrz2FwIsOperationAllowed()){
+		ptrReference.form.scrollbody.value=getScrollPosition();
+		ptrReference.form.submit();
+	}
+	return false;
+}
+function doSubmitSelf(ptrReference) {
+	if(yrz2FwIsOperationAllowed()){
+		ptrReference.form.submit();
+	}
+	return false;
+}
+
+function changeMaxView(){
+	document.form1.submit();
+}
+
+function setAndSubmitPagination(formName, fieldContent) {
+	var flgPostOK = true;
+	if(typeof(yrz2PaginationCallback) !== 'undefined') {
+		flgPostOK = yrz2PaginationCallback();
+	}
+	if(flgPostOK) {
+		setPaginationPage(formName, fieldContent);
+		submitForm(formName);
+	}
+}
+
+function setPaginationPage(formName, fieldContent) {
+	form = document.getElementById(formName);
+	form.page.value = fieldContent;
+}
+function submitForm(formName) {
+	form = document.getElementById(formName);
+	form.submit();
+}
+
+function encodeURL(str) {
+  var character = '';
+  var unicode   = '';
+  var string    = '';
+  var i         = 0;
+
+  for (i = 0; i < str.length; i++) {
+    character = str.charAt(i);
+    unicode   = str.charCodeAt(i);
+
+    if (character == ' ') {
+      string += '+';
+    } else {
+      if (unicode == 0x2a || unicode == 0x2d || unicode == 0x2e || unicode == 0x5f || ((unicode >= 0x30) && (unicode <= 0x39)) || ((unicode >= 0x41) && (unicode <= 0x5a)) || ((unicode >= 0x61) && (unicode <= 0x7a))) {
+        string = string + character;
+      } else {
+        if ((unicode >= 0x0) && (unicode <= 0x7f)) {
+          character   = '0' + unicode.toString(16);
+          string += '%' + character.substr(character.length - 2);
+        } else if (unicode > 0x1fffff) {
+          string += '%' + (oxf0 + ((unicode & 0x1c0000) >> 18)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0x3f000) >> 12)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0xfc0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        } else if (unicode > 0x7ff) {
+          string += '%' + (0xe0 + ((unicode & 0xf000) >> 12)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0xfc0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        } else {
+          string += '%' + (0xc0 + ((unicode & 0x7c0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        }
+      }
+    }
+  }
+
+  return string;
+}
+
+function getText( element ) {
+  if( element.textContent ) {
+    return element.textContent;
+  } else if( element.innerText ) {
+    return element.innerText;
+  } else {
+    return '';
+  }
+}
+
+function getNodeValue( element ) {
+  if ( element.childNodes.length ) {
+    return element.childNodes[0].nodeValue
+  } else {
+    return '';
+  }
+}
+
+function changeText(where, what) {
+  if (document.getElementById) {
+    document.getElementById(where).innerHTML = what;
+  } else if (document.all) {
+    document.all[where].innerHTML = what;
+  }
+}
+function addText(where, what) {
+  if (document.getElementById) {
+    document.getElementById(where).innerHTML += '<br>';
+    document.getElementById(where).innerHTML += what;
+  } else if (document.all) {
+    document.all[where].innerHTML += '<br>';
+    document.all[where].innerHTML += what;
+  }
+}
+
+myFlg = 0;
+function blinkText(where, what, alt, interval){
+
+	setInterval(
+		function(){
+			if (myFlg == 0){
+				changeText(where, what);
+				myFlg = 1;
+			}else{
+				changeText(where, alt);
+				myFlg = 0;
+			}
+		}
+	, interval);
+}
+
+function saveScrollPosition(xname,yname) {
+	if(xname != null) {
+		document.getElementById(xname).value = getScrollPosX();
+	}
+	if(yname != null) {
+		document.getElementById(yname).value = getScrollPosY();
+	}
+}
+function getScrollPosX() {
+	var scrollX = 0;
+	switch(navigator.appName) {
+		case 'Microsoft Internet Explorer':
+			if(document.documentElement && document.documentElement.scrollLeft){
+				scrollX = document.documentElement.scrollLeft;
+			} else {
+				scrollX = document.body.scrollLeft;
+			}
+			break;
+		default:
+			scrollX = window.pageXOffset;
+			break;
+	}
+	return scrollX;
+}
+function getScrollPosY() {
+	return getScrollPosition();
+}
+function getScrollPosition() {
+	var scrollY = 0;
+	switch(navigator.appName) {
+		case 'Microsoft Internet Explorer':
+			if(document.documentElement && document.documentElement.scrollTop){
+				scrollY = document.documentElement.scrollTop;
+			} else {
+				scrollY = document.body.scrollTop;
+			}
+			break;
+		default:
+			scrollY = window.pageYOffset;
+			break;
+	}
+	return scrollY;
+}
+function scrollBodyXY( xpos,ypos ) {
+	window.scrollBy(xpos,ypos);
+}
+function scrollBody( ypos ) {
+	window.scrollBy(0,ypos);
+}
+
+function padDigits(n, totalDigits) {
+	n = n.toString(); 
+	var pd = ''; 
+	if (totalDigits > n.length) {
+		for (i=0; i < (totalDigits-n.length); i++) {
+			pd += '0';
+		}
+	}
+	return pd + n.toString();
+}
+function getElementX(obj) {
+	var pos = getElementPos(obj);
+	return pos[0];
+}
+
+function getElementY(obj) {
+	var pos = getElementPos(obj);
+	return pos[1];
+}
+function getElementPos(cobj){
+	var clft=cobj.offsetLeft;
+	var ctop=cobj.offsetTop;
+	while(cobj.offsetParent!=null){
+		var cpar=cobj.offsetParent;
+		clft+=cpar.offsetLeft;
+		ctop+=cpar.offsetTop;
+		cobj=cpar;
+	}
+	return [clft,ctop];
+}
+
+function urldecode( str ) {
+	var histogram = {}, histogram_r = {}, code = 0, str_tmp = [];
+	var ret = str.toString();
+	
+	var replacer = function(search, replace, str) {
+		var tmp_arr = [];
+		tmp_arr = str.split(search);
+		return tmp_arr.join(replace);
+	};
+	
+	histogram['!']   = '%21';
+	histogram['%20'] = '+';
+	
+	for (replace in histogram) {
+		search = histogram[replace];
+		ret = replacer(search, replace, ret);
+	}
+	
+	ret = decodeURIComponent(ret);
+	return ret;
+}
+
+function setTransparency(d,val){
+	var f=d.style;
+	if("opacity"in f) {
+		f.opacity=val;
+	} else if("MozOpacity"in f) {
+		f.MozOpacity=val;
+	} else if("filter"in f) {
+		var val = val * 100;
+		f.filter="alpha(opacity="+val+")";
+	}
+}
+
+function yrz2FwDisableOnProcessing() {
+	var domObj = document.getElementById('loadingRotatorFS');
+	domObj.style.display = '';
+}
+
+var yrz2FwIsOperationAllowedFlag = true;
+var yrz2FwIsMessageDisplayed = false;
+function yrz2FwMessageSetText(hdr,cnt,pos) {
+	var halign="center";
+	var valign="middle";
+	if(pos != undefined) {
+	}
+	
+	var domObj = document.getElementById('yrz2MessagePopup');
+	domObj.innerHTML = "\
+<table width='100%' height='100%'>\
+<tr valign='"+valign+"'><td align='"+halign+"'>\
+<table width='300px' class='border_gray_1px' cellpadding='0' cellspacing='0'>\
+<tr class='bgcolor_table_head'><td class='txt_12' align='center'>\
+<b>"+hdr+"<\/b>\
+<\/td><\/tr><tr><td class='txt_12' align='center'>\
+<br\/>"+cnt+"<br\/><br\/>\
+<\/td><\/tr>\
+<\/table>\
+<\/td>\
+<\/tr>\
+<\/table>";
+}
+function yrz2FwMessageDisplay() {
+	if(yrz2FwIsMessageDisplayed == false) {
+		yrz2FwIsMessageDisplayed = true;
+		var domObj = document.getElementById('yrz2MessagePopup');
+		domObj.style.display = '';
+		return true;
+	} else {
+		return false;
+	}
+}
+function yrz2FwMessageHide() {
+	var domObj = document.getElementById('yrz2MessagePopup');
+	domObj.style.display = 'none';
+}
+function yrz2FwDisplayInOperation(mde) {
+	if(mde==undefined | mde==0) {
+		yrz2FwMessageSetText("システムメッセージ","処理中です。もうしばらくお待ち下さい。");
+		setTimeout(function(){yrz2FwDisplayInOperation(1)},50);
+	} else {
+		if(!yrz2FwMessageDisplay()) {
+			setTimeout(function(){yrz2FwDisplayInOperation(1)},1000);
+		}
+	}
+}
+function yrz2FwIsOperationAllowed(dsptim) {
+	if(yrz2FwIsOperationAllowedFlag == true) {
+		yrz2FwIsOperationAllowedFlag = false;
+		if(dsptim != undefined) {
+			setTimeout(function(){yrz2FwDisplayInOperation(0)},dsptim*1000);
+		}
+		return true;
+	}
+	return false;
+}
+function yrz2FwResetOperationAllowedFlag() {
+	yrz2FwIsOperationAllowedFlag = true;
+}
+
+function yrz2FwDecodeHtmlSpecialChars (string, quote_style) {
+	var optTemp = 0;
+	var noquotes = false;
+	
+	if (typeof quote_style === 'undefined') {
+		quote_style = 2;
+	}
+	var OPTS = {
+		'ENT_NOQUOTES': 0,
+		'ENT_HTML_QUOTE_SINGLE': 1,
+		'ENT_HTML_QUOTE_DOUBLE': 2,
+		'ENT_COMPAT': 2,
+		'ENT_QUOTES': 3,
+		'ENT_IGNORE': 4,
+		'ENT_NOBRACKETS': 8,
+		'ENT_NOAMPERSAND': 16
+	};
+	if (quote_style === 0) {
+		noquotes = true;
+	}
+	if (typeof quote_style !== 'number') {
+		quote_style = [].concat(quote_style);
+		var i = 0;
+		for (i = 0; i < quote_style.length; i++) {
+			if (OPTS[quote_style[i]] === 0) {
+				noquotes = true;
+			} else if (OPTS[quote_style[i]]) {
+				optTemp = optTemp | OPTS[quote_style[i]];
+			}
+		}
+		quote_style = optTemp;
+	}
+	if (!(quote_style & OPTS.ENT_NOBRACKETS)) {
+		string = string.toString().replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+	}
+	if (quote_style & OPTS.ENT_HTML_QUOTE_SINGLE) {
+		string = string.replace(/&#0*39;/g, "'"); // PHP doesn't currently escape if more than one 0, but it should
+		// string = string.replace(/&apos;|&#x0*27;/g, "'"); // This would also be useful here, but not a part of PHP
+	}
+	if (!noquotes) {
+		string = string.replace(/&quot;/g, '"');
+	}
+	if(!(quote_style & OPTS.ENT_NOAMPERSAND)) {
+		string = string.replace(/&amp;/g, '&');
+	}
+	return string;
+}
+
+function yrz2UpdateAndDoAction(_elementName,_cookieName,_obj,_action){
+	if ( typeof _elementName!='undefined' && typeof (_cookieName)!='undefined'){
+		yrz2UpdateCookie(_elementName,_cookieName);
+		if ( typeof _action!='undefined' ){
+			yrz2DoAction(_obj,_action);
+		}
+	}
+}
+
+function yrz2UpdateCookie(_elementName,_cookieName){
+	if (typeof (_elementName)!='undefined' ){
+		var name = document.getElementsByName(_elementName);
+		if ( typeof(name[0])!='undefined' ){
+			setCookie( _cookieName, name[0].options[name[0].selectedIndex].value );
+		} else {
+			setCookie( _cookieName, -1 );
+		}
+	}
+}
+
+function yrz2DoAction(_obj,_action){
+	if(typeof(_obj) != 'undefined'){
+		if(typeof(_action) != 'undefined'){
+			if (_action=='submit'){
+				_obj.submit();
+			} else {
+				_obj.location.href = _action;
+			}
+		} 
+	}
+}
+
+
+
+		-->
+	</script>
+</head>
+<body >
+<!-- ヘッダー -->
+<div id="header">
+	<div id="header_bar">
+				<table width="100%" style="height:54px;" border="0" cellpadding="0" cellspacing="0" class="header_bg">
+			<tr>
+				<td width="20"><img src="common/images/spacer.gif" alt="" width="20" height="1" /></td>
+				<td width="106"><a href="./"><img src="common/img_default/00_top_header_logo_kin.gif" alt="万屋一家" height="39" border="0" /></a></td>
+				<td width="20"><img src="common/images/spacer.gif" alt="" width="20" height="1" /></td>
+				<td valign="top">
+					<div id="user">
+						<div class="user_name">サンプル株式会社 第一チーム 勤野 助太郎さん</div>
+ 
+						<div class="user_login">前回ログイン：2017-01-25 20:42:12</div>
+					
+					</div>
+				</td>
+				<td width="10">
+					<img src="common/images/spacer.gif" alt="" width="10" height="1" />
+				</td>
+				<td align="right" valign="middle">
+					<noscript><span class="user_name">※JavaScript を有効にしてください。　<br/></span></noscript>
+														</td>
+				<td align="right" valign="top"><div id="headr_form" class="txt_12_2">
+						<script type="text/JavaScript">
+						<!--
+						function MM_jumpMenu(targ,selObj,restore){ //v3.0
+							if ( selObj.options[selObj.selectedIndex].value == 'ja' ) {
+								setCookie( "language", 'ja' );
+								location.reload();
+							} else if ( selObj.options[selObj.selectedIndex].value == 'en' ) {
+								setCookie( "language", 'en' );
+								location.reload();
+							} else {
+								eval(targ+".location='"+selObj.options[selObj.selectedIndex].value+"'");
+								if (restore) selObj.selectedIndex=0;
+							}
+						}
+						function setCookie( key, val, tmp ){
+							tmp = key + "=" + escape(val) + "; ";
+							// tmp += "path=" + location.pathname + "; ";
+							// tmp += "expires=Tue, 31-Dec-2030 23:59:59; ";
+							document.cookie = tmp;
+						}
+
+						-->
+						</script>
+						<form method="post" action="./">
+							<select name="kihon_settei" size="1" onchange="MM_jumpMenu('parent',this,1)">
+								<option value="#" selected="selected">（各種基本設定）</option>
+								<option value="./?module=menu&amp;action=lineup">メニューリスト</option>
+								<option value="./?module=individual&amp;action=toppage">個人設定</option>
+								<option value="./?module=manual&amp;action=manual">操作ガイド</option>
+														</select>
+							<input type="submit" name="logout" value="ログアウト" />
+							<input type="hidden" name="module" value="logout" />
+						</form>
+					</div>
+				</td>
+				<td width="20">
+					<img src="common/images/spacer.gif" alt="" width="20" height="1" />
+				</td>
+			</tr>
+		</table>
+	</div>
+	<!-- アイコンメニュー -->
+			<div id="header_menu">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="header_menu_bgcolor">
+				<tr>
+					<td align="left" class="header_menu_padding">
+						<table border="0" cellpadding="0" cellspacing="0">
+							<tr>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=timesheet&amp;action=browse">
+											<img src="common/img_icon/main_icon_Syukkinbo.gif" alt="出勤簿" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=application_form&amp;action=application_form">
+											<img src="common/img_icon/main_icon_KakusyuShinsei.gif" alt="各種申請" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=vacation_history&amp;action=vacation_history">
+											<img src="common/img_icon/main_icon_KyuukaRireki.gif" alt="休暇履歴" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke/payslip&amp;action=yonosuke/payslip">
+											<img src="common/img_icon/main_icon_KyuuyoMeisaisyo.gif" alt="給与明細書" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke_closing/taxwithholdingslip&amp;action=yonosuke_closing/taxwithholdingslip">
+											<img src="common/img_icon/main_icon_GensenCyousyuuhyo.gif" alt="源泉徴収票" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+															</tr>
+							<tr class="txt_10_2_center">
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=timesheet&amp;action=browse">
+											出勤簿
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=application_form&amp;action=application_form">
+											各種申請
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=vacation_history&amp;action=vacation_history">
+											休暇履歴
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke/payslip&amp;action=yonosuke/payslip">
+											給与<br />明細書
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke_closing/taxwithholdingslip&amp;action=yonosuke_closing/taxwithholdingslip">
+											源泉<br />徴収票
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+															</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+<!-- /ヘッダー -->
+<table width="100%">
+	<tr>
+		<td width="120" align="center" valign="top">
+
+		</td>
+		<td align="center" valign="top">
+
+<!-- コンテンツ -->
+<div id="wrapper_main" align="center">
+	<!-- コンテンツエリアはデフォルトで　W=720px, H=550px以上 -->
+	<table width="720" height="550" border="0" cellpadding="0" cellspacing="0" id="main_table">
+		<tr>
+			<td align="center" valign="top">
+				<div id="main_header_area">
+					<table width="720" border="0" cellpadding="0" cellspacing="0" class="main_header_bg">
+						<tr>
+							<td width="100" rowspan="2" align="center" valign="top">
+								<img src="common/img_icon/main_icon_KakusyuShinsei.gif" alt="" width="59" height="56" />
+							</td>
+							<td align="left" valign="top" class="main_header">
+								<span class="main_header_small"><a href="./">トップページ</a> &gt; </span>各種申請</td>
+						</tr>
+						<tr>
+							<td align="left" valign="top">
+								<div id="header_tab_menu"></div>
+							</td>
+						</tr>
+					</table>
+				</div>
+
+
+					<table width="700" border="0" cellpadding="0" cellspacing="0" class="txt_12">
+						<tr>
+							<td align="left">
+								<div id="kensaku" align="center" class="bottom_20">
+									<table width="680" border="0" cellspacing="0" cellpadding="7">
+										<tr class="txt_12">
+											<td align="center" nowrap="nowrap" class="bgcolor_gray">
+												<form id="search_form" method="post" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<table border="0" cellspacing="0" cellpadding="3">
+														<tr align="left">
+															<td>
+																<img src="common/img_icon/icon_lupe.gif" alt="" width="22" height="27" align="absmiddle" />
+															</td>
+															<td>
+																<input name="keyword" type="text" style="width:380px" value=""/>
+																<input type="button" value="検索" onclick="javascript:return(doSearch());"/>
+																<select name="max_view">
+																	<option value="10">10</option>
+<option value="20">20</option>
+<option value="50" selected="selected">50</option>
+<option value="100">100</option>
+<option value="200">200</option>
+
+																</select>
+																件表示
+																<input type="hidden" name="module" value="application_form" />
+																<input type="hidden" name="action" value="application_form" />
+																<input type="hidden" name="page"   value="0" />
+																<input type="hidden" name="sorting" id="sorting" value="ad0" />
+															</td>
+														</tr>
+														<tr>
+															<td align="left">&nbsp;</td>
+															<td align="left">
+																<select name="date_select">
+<option label="申請日" value="1" selected="selected">申請日</option>
+<option label="対象日" value="2">対象日</option>
+</select>
+
+																&nbsp;
+																<select name="start_date_Year">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016" selected="selected">2016</option>
+<option value="2017">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="start_date_Month">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12" selected="selected">12</option>
+</select>月<span id="start_date_Day"> <select name="start_date_Day">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25" selected="selected">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+																&nbsp;&nbsp;&nbsp;&nbsp;～&nbsp;&nbsp;&nbsp;
+																<select name="end_date_Year">
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017" selected="selected">2017</option>
+<option value="2018">2018</option>
+</select>年<select name="end_date_Month">
+<option value="01" selected="selected">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>月<span id="end_date_Day"> <select name="end_date_Day">
+<option value="01">01</option>
+<option value="02">02</option>
+<option value="03">03</option>
+<option value="04">04</option>
+<option value="05">05</option>
+<option value="06">06</option>
+<option value="07">07</option>
+<option value="08">08</option>
+<option value="09">09</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25" selected="selected">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+</select>日</span>
+															</td>
+														</tr>
+														<tr>
+															<td align="left">&nbsp;</td>
+															<td align="left">&nbsp;申請書類&nbsp;
+																<select name="search_application_form_master_id">
+																	<option value="0" label="全ての書類">全ての書類</option>
+																																																																																									<option value="121" label="打刻訂正*">打刻訂正*</option>
+																																																																																									<option value="122" label="残業申請*">残業申請*</option>
+																																																																																									<option value="123" label="所定外休憩申請*">所定外休憩申請*</option>
+																																																																																									<option value="124" label="有休取得申請*">有休取得申請*</option>
+																																																																																									<option value="125" label="特休(有給)取得申請*">特休(有給)取得申請*</option>
+																																																																																									<option value="126" label="振休取得申請*">振休取得申請*</option>
+																																																																																									<option value="115" label="休日出勤（代休含む）*">休日出勤（代休含む）*</option>
+																																																																																									<option value="118" label="代休取得申請*">代休取得申請*</option>
+																																																																																									<option value="165" label="代休取得申請（２）*">代休取得申請（２）*</option>
+																																																																																									<option value="127" label="欠勤申請*">欠勤申請*</option>
+																																																																																									<option value="141" label="直行直帰*">直行直帰*</option>
+																																																																																									<option value="144" label="電車遅延*">電車遅延*</option>
+																																																																																									<option value="147" label="時差出勤*">時差出勤*</option>
+																																																																																									<option value="149" label="特休（無給）取得申請*">特休（無給）取得申請*</option>
+																																																																																									<option value="151" label="月一・隔月・調整休暇申請*">月一・隔月・調整休暇申請*</option>
+																																																																																									<option value="154" label="徹夜明け休暇申請*">徹夜明け休暇申請*</option>
+																																																																																									<option value="157" label="早出申請*">早出申請*</option>
+																																																																																									<option value="158" label="休職取得申請*">休職取得申請*</option>
+																																																																																									<option value="159" label="出張申請*">出張申請*</option>
+																																																																																									<option value="162" label="深夜勤務申請*">深夜勤務申請*</option>
+																																	
+																</select>
+																承認状況&nbsp;
+																<select name="search_acceptation_status">
+<option label="全て" value="1" selected="selected">全て</option>
+<option label="未承認" value="2">未承認</option>
+<option label="承認中" value="3">承認中</option>
+<option label="未決裁" value="5">未決裁</option>
+<option label="決裁済" value="4">決裁済</option>
+</select>
+
+																申請状態&nbsp;
+																<select name="search_application_status">
+<option label="全て" value="0" selected="selected">全て</option>
+<option label="再申請" value="1">再申請</option>
+<option label="取消申請" value="2">取消申請</option>
+<option label="差戻" value="3">差戻</option>
+<option label="却下" value="5">却下</option>
+</select>
+
+																申請者&nbsp;
+																<select name="search_proxydisplay">
+<option label="本人" value="0" selected="selected">本人</option>
+<option label="代理" value="1">代理</option>
+<option label="両方" value="2">両方</option>
+</select>
+
+															</td>
+														</tr>
+													</table>
+												</form>
+											</td>
+										</tr>
+									</table>
+									<table width="100%" border="0" cellpadding="10" cellspacing="0" class="txt_12">
+									</table>
+								</div>
+
+								<div id="navi" class="bottom_20">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" class="txt_10">
+	<tr>
+		<td width="38%" align="right">
+								</td>
+		<td width="24%" align="center" class="bgcolor_gray">
+		1～9件表示/9件中
+		</td>
+		<td width="38%" align="left">&nbsp;&nbsp;&nbsp;&nbsp;
+								</td>
+	</tr>
+</table>
+								</div>
+
+								<div class="bottom_10" id="div">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" class="txt_12">
+										<tr>
+											<td align="left">
+																																				選択中の申請書を&nbsp;<input type="button" value="削除" name="delete" onClick="javascript:doDelete(50);" />
+																							</td>
+											<td align="right">
+																							<form method="POST" id="frmAdd" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																										
+																																																		
+													<script language="javascript">
+													function selectPopup(evt,obj,usetimer) {
+														var index = obj.options.selectedIndex;
+														var ypos = 0;
+														var starttimer = 0;
+														var ydelta = -10;
+														var debug='';
+														
+														if(usetimer == true) {
+															ypos = getElementY(obj);
+														} else {
+																													}
+													
+																																																																																																																																																																																																																			if
+																										
+														(index == 2) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>所定外休憩申請*の説明：</b></td></tr><tr><td>所定の時間以外に休憩した場合に利用します。'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																																																												
+														}
+													
+																																																																																																																																																																												else if
+																										
+														(index == 4) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>特休(有給)取得申請*の説明：</b></td></tr><tr><td>慶事・弔事などの休暇(Connectの慶弔申請もあげてください)'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																												else if
+																										
+														(index == 6) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>休日出勤（代休含む）*の説明：</b></td></tr><tr><td>実働3時間以上6時間未満は「半日休出」、6時間以上は「休日出勤」となります。'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																																																																																																																																																																																																																																		else if
+																										
+														(index == 11) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>電車遅延*の説明：</b></td></tr><tr><td>「遅延証明書」を上長に提示してください。'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																												else if
+																										
+														(index == 13) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>特休（無給）取得申請*の説明：</b></td></tr><tr><td>生理休暇、看護休暇はこちらから申請してください'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																														
+														else {
+															if(isTimer == 0) {
+																closePopup();
+															}
+														}
+														if(starttimer == 1) {
+															isTimer = 1;
+															setTimeout("isTimer = 0;closePopup();",3000);
+														}
+													
+																										
+													}
+													</script>
+													
+																								<select id="slct_appformmasterid" name="application_form_master_id" onmousemove="selectPopup(event,this,false);" onchange="selectPopup(event,this,true);" onmouseout="if(isTimer==0){closePopup();}">
+														<option value="121">打刻訂正*</option>
+<option value="122">残業申請*</option>
+<option value="123">所定外休憩申請*</option>
+<option value="124">有休取得申請*</option>
+<option value="125">特休(有給)取得申請*</option>
+<option value="126">振休取得申請*</option>
+<option value="115">休日出勤（代休含む）*</option>
+<option value="118">代休取得申請*</option>
+<option value="165">代休取得申請（２）*</option>
+<option value="127">欠勤申請*</option>
+<option value="141">直行直帰*</option>
+<option value="144">電車遅延*</option>
+<option value="147">時差出勤*</option>
+<option value="149">特休（無給）取得申請*</option>
+<option value="151">月一・隔月・調整休暇申請*</option>
+<option value="154">徹夜明け休暇申請*</option>
+<option value="157">早出申請*</option>
+<option value="158">休職取得申請*</option>
+<option value="159">出張申請*</option>
+<option value="162">深夜勤務申請*</option>
+
+													</select>
+													<input type="button" value="追加" onclick="javascript:return(doAdd(this.form));" />
+													<input type="hidden" name="entry" value="1" />
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="editor" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+																						</td>
+										</tr>
+									</table>
+								</div>
+
+
+								<div class="bottom_10">
+									<table width="100%" border="0" cellpadding="3" cellspacing="1" class="bgcolor_gray2">
+										<tr class="bgcolor_table_head">
+											<td rowspan="2" align="center">
+												<input type="checkbox" id="check_all" value="1" onClick="javascript:checkAll(50);" />
+											</td>
+											<td onMouseOver="colorcache=this.style.backgroundColor;this.style.backgroundColor='#ffbd5e';" onMouseOut="this.style.backgroundColor=colorcache;" rowspan="2" nowrap="nowrap" style="cursor:pointer" onclick="document.getElementById('sorting').value='ad1';document.getElementById('search_form').submit();">
+												申請日時&nbsp;<img src="common/img_icon/btn_sortdown.gif"/>											</td>
+											<td rowspan="2" nowrap="nowrap">申請書類</td>
+											<td rowspan="2" nowrap="nowrap">申請内容</td>
+											<td rowspan="2" nowrap="nowrap">コメント</td>
+											<td rowspan="2" nowrap="nowrap">承認日時</td>
+											<td colspan="2" rowspan="2" nowrap="nowrap">申請者</td>
+											<td colspan="5" align="center">承認状況</td>
+											<td rowspan="2" align="center" nowrap="nowrap">書類</td>
+											<td rowspan="2" align="center" nowrap="nowrap">削除</td>
+										</tr>
+										<tr class="bgcolor_table_head">
+											<td width="39" align="center">1</td>
+											<td width="39" align="center">2</td>
+											<td width="39" align="center">3</td>
+											<td width="39" align="center">4</td>
+											<td width="39" align="center">5</td>
+										</tr>
+																																																	<tr class="bgcolor_white">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2017/01/25 12:59:04
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												打刻訂正*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap">
+																									プロジェクト打ち合わせのため<br />
+																																																																2017/01/25&nbsp;の														出社
+																																							&nbsp;2017/01/25 10:00
+																																																			<br />
+																																			</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2017/01/25 13:02:47
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="108515" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="01/25 12:59:04 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="01/25 13:02:47 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_table">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2017/01/24 10:03:40
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												有休取得申請*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap">
+																									休暇のため<br />
+																																																																2017/01/20&nbsp;														一日有休
+																																																															<br />
+																																			</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2017/01/25 13:02:23
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="108416" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="01/24 10:03:40 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="01/25 13:02:23 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_white">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2017/01/11 11:45:03
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												打刻訂正*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap">
+																									プロジェクト打ち合わせのため<br />
+																																																																2017/01/11&nbsp;の														出社
+																																							&nbsp;2017/01/11 10:00
+																																																			<br />
+																																			</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2017/01/17 14:49:45
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="107817" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="01/11 11:45:03 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="01/17 14:49:45 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_table">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2017/01/06 12:47:12
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												残業申請*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap" onmousemove="showPopup(event,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>2017/01/06 12:47:12 の申請内容：</b></td></tr><tr><td>プロジェクト作業のため<br/><br/>											2016/12/16&nbsp;時間外終了時刻&nbsp;2016/12/16 21:35											<br>											2016/12/19&nbsp;時間外終了時刻&nbsp;2016/12/19 21:04											<br>											2016/12/20&nbsp;時間外終了時刻&nbsp;2016/12/21 00:13											<br>											2016/12/21&nbsp;時間外終了時刻&nbsp;2016/12/21 23:10											<br>											2016/12/22&nbsp;時間外終了時刻&nbsp;2016/12/22 20:17											<br>											2016/12/26&nbsp;時間外終了時刻&nbsp;2016/12/26 18:44											<br>											2016/12/27&nbsp;時間外終了時刻&nbsp;2016/12/28 00:02											<br>											2016/12/28&nbsp;時間外終了時刻&nbsp;2016/12/28 19:00											<br>											2016/12/29&nbsp;時間外終了時刻&nbsp;2016/12/29 18:30											<br></td></tr></table>');" onmouseout="closePopup();">
+																									プロジェクト作業のため<br />
+																																																																2016/12/16&nbsp;の														時間外終了時刻
+																																							&nbsp;2016/12/16 21:35
+																																																			<br />
+																																																				2016/12/19&nbsp;の														時間外終了時刻
+																																							&nbsp;2016/12/19 21:04
+																																																			<br />
+																																																		...<br />
+																							</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2017/01/06 16:02:18
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="107541" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="01/06 12:47:12 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="01/06 16:02:18 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_white">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2017/01/06 12:46:34
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												残業申請*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap" onmousemove="showPopup(event,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>2017/01/06 12:46:34 の申請内容：</b></td></tr><tr><td>プロジェクト作業のため<br/><br/>											2016/12/01&nbsp;時間外終了時刻&nbsp;2016/12/01 22:23											<br>											2016/12/02&nbsp;時間外終了時刻&nbsp;2016/12/02 20:35											<br>											2016/12/06&nbsp;時間外終了時刻&nbsp;2016/12/06 23:26											<br>											2016/12/07&nbsp;時間外終了時刻&nbsp;2016/12/07 21:55											<br>											2016/12/08&nbsp;時間外終了時刻&nbsp;2016/12/08 22:18											<br>											2016/12/09&nbsp;時間外終了時刻&nbsp;2016/12/09 22:18											<br>											2016/12/12&nbsp;時間外終了時刻&nbsp;2016/12/13 00:10											<br>											2016/12/13&nbsp;時間外終了時刻&nbsp;2016/12/14 00:02											<br>											2016/12/14&nbsp;時間外終了時刻&nbsp;2016/12/15 00:16											<br>											2016/12/15&nbsp;時間外終了時刻&nbsp;2016/12/15 20:13											<br></td></tr></table>');" onmouseout="closePopup();">
+																									プロジェクト作業のため<br />
+																																																																2016/12/01&nbsp;の														時間外終了時刻
+																																							&nbsp;2016/12/01 22:23
+																																																			<br />
+																																																				2016/12/02&nbsp;の														時間外終了時刻
+																																							&nbsp;2016/12/02 20:35
+																																																			<br />
+																																																		...<br />
+																							</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2017/01/06 16:02:03
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="107537" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="01/06 12:46:34 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="01/06 16:02:03 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_table">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2017/01/05 10:12:45
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												打刻訂正*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap" onmousemove="showPopup(event,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>2017/01/05 10:12:45 の申請内容：</b></td></tr><tr><td>申請ミスにより出社時間が退社時間になってしまっていたため訂正<br/><br/>											2016/12/29&nbsp;出社&nbsp;2016/12/29 10:00											<br></td></tr></table>');" onmouseout="closePopup();">
+																									申請ミスにより出社時間が退...<br />
+																																																																2016/12/29&nbsp;の														出社
+																																							&nbsp;2016/12/29 10:00
+																																																			<br />
+																																			</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2017/01/05 12:05:57
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="107178" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="01/05 10:12:45 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="01/05 12:05:57 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_white">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2017/01/05 10:10:39
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												打刻訂正*
+																																																<br/>
+												<font color="#BF2626">[再申請]</font>
+																							</td>
+																																												<td rowspan="2" nowrap="nowrap" onmousemove="showPopup(event,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>2017/01/05 10:10:39 の申請内容：</b></td></tr><tr><td>最終出社日のため&lt;br&gt;（出社と退社を間違えていたため再申請）<br/><br/>											2016/12/29&nbsp;退社&nbsp;2016/12/29 18:30											<br></td></tr></table>');" onmouseout="closePopup();">
+																									最終出社日のため<br/>（出社と...<br />
+																																																																2016/12/29&nbsp;の														退社
+																																							&nbsp;2016/12/29 18:30
+																																																			<br />
+																																			</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2017/01/05 12:05:49
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="107174" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="01/05 10:10:39 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="01/05 12:05:49 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_red_light">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2016/12/29 13:08:40
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												打刻訂正*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap">
+																									最終出社日のため<br />
+																																																																2016/12/29&nbsp;の														出社
+																																							&nbsp;2016/12/29 18:30
+																																																			<br />
+																																			</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																					<font color="#BF2626">[再申請元]</font><br />
+																																																																									2016/12/29 13:27:33
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="106869" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_red_light">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="12/29 13:08:40 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_red_light">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="12/29 13:27:33 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_red_light">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_red_light">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_red_light">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_red_light">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																																																	<tr class="bgcolor_white">
+																					<td rowspan="2" align="center">
+																									<br />
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												2016/12/29 10:07:12
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+												打刻訂正*
+																																															</td>
+																																												<td rowspan="2" nowrap="nowrap">
+																									カード記録ミスのため<br />
+																																																																2016/12/29&nbsp;の														出社
+																																							&nbsp;2016/12/29 10:00
+																																																			<br />
+																																			</td>
+																																	<td rowspan="2" nowrap="nowrap">
+												
+												
+											</td>
+											<td rowspan="2" nowrap="nowrap">
+																																																																																					2016/12/29 10:17:10
+																							</td>
+											<td rowspan="2" nowrap="nowrap">
+												勤野&nbsp;
+												助太郎
+																							</td>
+											<td width="39" align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+												申請者
+											</td>
+
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																																										決裁者
+																																							</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																																			<td align="center" nowrap="nowrap" class="bgcolor_gray_txt10">
+																											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+																									</td>
+																						<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+													<input type="image" src="./common/img_icon/btn_etsuran.gif" alt="閲覧" class="btn_s" onclick="javascript:return(doSubmitSelf(this));"/>
+													<input type="hidden" name="entry" value="1"/>
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="browse" />
+													<input type="hidden" name="application_master_id"
+														 value="106692" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+											</td>
+											<td rowspan="2" align="center" class="bgcolor_white">
+												<form method="POST" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																									</form>
+											</td>
+
+										</tr>
+										<tr class="txt_12_none_color_border_3">
+											<td align="center" class="bgcolor_white">
+																																																																														<img src="common/stamp/st_satou_1.png"
+														alt="勤野" title="12/29 10:07:12 KN012345 勤野 助太郎">
+																							</td>
+
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																																													<img src="common/stamp/st_suzuki_1.png"
+																	alt="上長" title="12/29 10:17:10 JP10925 上長 和哉">
+																																										</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																																																																																																																																																												<td align="center" class="bgcolor_white">
+													<form action="./" method="POST"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																													<br />
+																											</form>
+												</td>
+																					</tr>
+																		</table>
+								</div>
+
+								<div class="bottom_10" id="div">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" class="txt_12">
+										<tr>
+											<td align="left">
+																																				選択中の申請書を&nbsp;<input type="button" value="削除" name="delete" onClick="javascript:doDelete(50);" />
+																							</td>
+											<td align="right">
+																							<form method="POST" id="frmAdd" action="./"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+																										
+																																																		
+													<script language="javascript">
+													function selectPopup(evt,obj,usetimer) {
+														var index = obj.options.selectedIndex;
+														var ypos = 0;
+														var starttimer = 0;
+														var ydelta = -10;
+														var debug='';
+														
+														if(usetimer == true) {
+															ypos = getElementY(obj);
+														} else {
+																													}
+													
+																																																																																																																																																																																																																			if
+																										
+														(index == 2) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>所定外休憩申請*の説明：</b></td></tr><tr><td>所定の時間以外に休憩した場合に利用します。'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																																																												
+														}
+													
+																																																																																																																																																																												else if
+																										
+														(index == 4) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>特休(有給)取得申請*の説明：</b></td></tr><tr><td>慶事・弔事などの休暇(Connectの慶弔申請もあげてください)'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																												else if
+																										
+														(index == 6) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>休日出勤（代休含む）*の説明：</b></td></tr><tr><td>実働3時間以上6時間未満は「半日休出」、6時間以上は「休日出勤」となります。'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																																																																																																																																																																																																																																		else if
+																										
+														(index == 11) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>電車遅延*の説明：</b></td></tr><tr><td>「遅延証明書」を上長に提示してください。'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																												else if
+																										
+														(index == 13) {
+															showPopupFixed(evt,'<table width=\'100%\' class=\'border_gray_1px\' cellpadding=\'0\' cellspacing=\'0\'><tr class=\'bgcolor_table_head\'><td class=\'txt_12\'><b>特休（無給）取得申請*の説明：</b></td></tr><tr><td>生理休暇、看護休暇はこちらから申請してください'+debug+'</td></tr></table>',getElementX(obj)-230,ypos,0,ydelta);
+															if(usetimer == true) {
+																starttimer = 1;
+															}
+															
+																														
+														}
+													
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																														
+														else {
+															if(isTimer == 0) {
+																closePopup();
+															}
+														}
+														if(starttimer == 1) {
+															isTimer = 1;
+															setTimeout("isTimer = 0;closePopup();",3000);
+														}
+													
+																										
+													}
+													</script>
+													
+																								<select id="slct_appformmasterid" name="application_form_master_id" onmousemove="selectPopup(event,this,false);" onchange="selectPopup(event,this,true);" onmouseout="if(isTimer==0){closePopup();}">
+														<option value="121">打刻訂正*</option>
+<option value="122">残業申請*</option>
+<option value="123">所定外休憩申請*</option>
+<option value="124">有休取得申請*</option>
+<option value="125">特休(有給)取得申請*</option>
+<option value="126">振休取得申請*</option>
+<option value="115">休日出勤（代休含む）*</option>
+<option value="118">代休取得申請*</option>
+<option value="165">代休取得申請（２）*</option>
+<option value="127">欠勤申請*</option>
+<option value="141">直行直帰*</option>
+<option value="144">電車遅延*</option>
+<option value="147">時差出勤*</option>
+<option value="149">特休（無給）取得申請*</option>
+<option value="151">月一・隔月・調整休暇申請*</option>
+<option value="154">徹夜明け休暇申請*</option>
+<option value="157">早出申請*</option>
+<option value="158">休職取得申請*</option>
+<option value="159">出張申請*</option>
+<option value="162">深夜勤務申請*</option>
+
+													</select>
+													<input type="button" value="追加" onclick="javascript:return(doAdd(this.form));" />
+													<input type="hidden" name="entry" value="1" />
+													<input type="hidden" name="module" value="application_form" />
+													<input type="hidden" name="action" value="editor" />
+													<input type="hidden" name="status" value="default" />
+													<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+												</form>
+																						</td>
+										</tr>
+									</table>
+								</div>
+
+
+								<div id="navi" class="bottom_20">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" class="txt_10">
+	<tr>
+		<td width="38%" align="right">
+								</td>
+		<td width="24%" align="center" class="bgcolor_gray">
+		1～9件表示/9件中
+		</td>
+		<td width="38%" align="left">&nbsp;&nbsp;&nbsp;&nbsp;
+								</td>
+	</tr>
+</table>
+								</div>
+
+								<form method="POST" action="./" id="delete_confirm_form"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+									<input type="hidden" name="module"         value="application_form" />
+									<input type="hidden" name="action"         value="delete_confirm" />
+									<input type="hidden" name="application_master_id" value="" />
+									<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+								</form>
+
+								<form method="POST" action="./" id="pdf_form"> <input type="hidden" name="__sectag_31872a8bf983d218699287ce05d2a9ad" value="4b93b40caf45c27e1c444e8ca2694cde92f768a2b794807226fdd1961241c7eb"/><input type="hidden" name="__sectbi" value="27819c601af5e5b6d7df34e20c86bbd6"/>
+									<input type="hidden" name="module"         value="application_form" />
+									<input type="hidden" name="action"         value="pdf" />
+									<input type="hidden" name="application_id" value="" />
+									<input type="hidden" name="keyword" value="" />
+<input type="hidden" name="max_view" value="50" />
+<input type="hidden" name="page" value="0" />
+
+<input type="hidden" name="date_select" value="1" />
+
+<input type="hidden" name="start_date_Year" value="2016" />
+<input type="hidden" name="start_date_Month" value="12" />
+<input type="hidden" name="start_date_Day" value="25" />
+<input type="hidden" name="end_date_Year" value="2017" />
+<input type="hidden" name="end_date_Month" value="01" />
+<input type="hidden" name="end_date_Day" value="25" />
+
+<input type="hidden" name="search_application_form_master_id" value="" />
+<input type="hidden" name="search_acceptation_status" value="1" />
+<input type="hidden" name="search_application_status" value="" />
+<input type="hidden" name="search_proxydisplay" value="" />
+<input type="hidden" name="sorting" value="ad0" />
+
+								</form>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+	</table>
+	<p id="yrz_popup" class="yrz_popup" align="left"></p>
+</div>
+<!-- /コンテンツ -->
+
+
+		</td>
+		<td width="120" valign="top">
+			<br />
+		</td>
+	</tr>
+</table><div id="footer" class="txt_10_2"> 
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="footer_bg">
+		<tr>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+	万屋一家シリーズ Ver. 2.1.1306.1<br />
+	Copyright &copy; 2006-2017 HOYA Service Corp. All rights reserved.<br />
+	<br/>
+	</div>
+<div id="yrz2MessagePopup" style="display:none;"></div></body>
+</html>

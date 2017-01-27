@@ -1,0 +1,915 @@
+@charset "UTF-8";
+
+/*------------------------------------------------------------------
+
+全体共通CSS
+
+------------------------------------------------------------------*/
+
+* {
+	font-family: "ＭＳ Ｐゴシック", Arial, "Osaka", Helvetica, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", sans-serif;
+}
+
+img {
+	text-decoration: none;
+	border: none;
+}
+
+a:link img {
+	text-decoration: none;
+	border: none;
+}
+
+/* 画像リンク　ボーダーなし */
+.img_none_border a:link {
+	text-decoration: none;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+}
+.img_none_border a:visited {
+	text-decoration: none;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+}
+.img_none_border a:hover {
+	text-decoration: none;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+}
+
+p	{
+	margin:0px;
+	padding:0px;
+}
+
+/* 地図表示 */
+#mapdiv {
+	width: 380px;
+	height: 300px;
+	border: solid 1px #ccc;
+	vertical-align:middle;
+}
+.olControlAttribution {
+	font-size: 10px;
+	bottom: 5px;
+	right: 5px;
+}
+
+#yrz2MessagePopup {
+	position: fixed;
+	_position: absolute;
+	z-index: 99;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	_height: 100%;
+}
+
+/* 処理中のレイアー */
+#loadingRotatorFS {
+	position: fixed;
+	_position: absolute;
+	z-index: 99;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	_height: 100%;
+	background: #FFFFFF url('../../common/images/loading_big.gif') no-repeat center center;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+	filter: alpha(opacity=50);
+	-moz-opacity:0.5;
+	-khtml-opacity: 0.5;
+	opacity: 0.5;
+}
+
+#loadingRotatorFSIE {
+	position: fixed;
+	_position: absolute;
+	z-index: 99;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	_height: 100%;
+	background: #FFFFFF;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+	filter: alpha(opacity=50);
+	-moz-opacity:0.5;
+	-khtml-opacity: 0.5;
+	opacity: 0.5;
+}
+
+/* コンテンツ内　フォームくずれ調整 */
+#wrapper_main form,tbody {
+	margin: 0px;
+	padding: 0px;
+}
+	/* IE7 */
+	*+ html #wrapper_main form {
+	margin: 0px;
+	padding: 0px;
+	vertical-align: middle;
+	}
+
+	/* IE6以下 */
+	* html #wrapper_main form {
+	margin: 0px;
+	padding: 0px;
+	vertical-align: middle;
+	}
+
+#wrapper_main input,select {
+	margin: 0px;
+}
+
+/* ボーダー ===================================================*/
+.border_gray_1px {
+	background: #FFFFFF;
+	border: 1px solid #AFAFAF;
+}
+
+/* テキスト ==================================================*/
+.txt_12 {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #666666;
+}
+
+.txt_12_white {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #FFFFFF;
+}
+
+.txt_12_black {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #000000;
+}
+
+.txt_12_lightgray {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #A3A3A3;
+}
+
+
+.txt_12_2 {
+	font-size: 12px;
+	line-height: 1.25em;
+	color: #666666;
+}
+
+.txt_12_2_white {
+	font-size: 12px;
+	line-height: 1.25em;
+	color: #FFFFFF;
+}
+
+
+
+/* 通常　基本色のみ・ボーダーなし */
+.txt_12_none {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #666666;
+	text-decoration: none;
+}
+.txt_12_none a:link {
+	color: #666666;
+	text-decoration: none;
+}
+.txt_12_none a:visited {
+	color: #666666;
+	text-decoration: none;
+}
+.txt_12_none a:hover {
+	color: #666666;
+	text-decoration: none;
+	border-bottom: 0px solid #666666;
+}
+
+
+
+/* 操作ガイド一覧用 */
+.txt_12_topmargin5 {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #666666;
+	margin-top:5px;
+}
+
+
+/* 通常基本色のみ */
+.txt_12_none_color _1 {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #666666;
+}
+.txt_12_none_color _2 {
+	font-size: 12px;
+	line-height: 2em;
+	color: #666666;
+}
+
+
+
+/* 通常アンダーラインなし・基本色のみ */
+.txt_12_none_color_border_1 {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #666666;
+}
+
+.txt_10_none_color_border_1 {
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #666666;
+}
+.txt_10_none_color_border_1  a:link{
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #666666;
+	text-decoration: none;
+}
+.txt_10_none_color_border_1  a:visited{
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #666666;
+	text-decoration: none;
+}
+.txt_10_none_color_border_1  a:hover{
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #666666;
+	text-decoration: none;
+}
+
+
+
+/* TOPページ用　テキスト
+	通常アンダーラインなし・基本色のみ */
+.txt_12_none_color_border_2 {
+	font-size: 12px;
+	line-height: 2em;
+	color: #666666;
+}
+
+
+
+.txt_10 {
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #666666;
+}
+.txt_10_none_color {
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #666666;
+}
+.txt_10_white {
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #FFFFFF;
+}
+.txt_10_black{
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #000000;
+}
+
+.txt_10_lightgray {
+	font-size: 10px;
+	line-height: 1.5em;
+	color: #A3A3A3;
+}
+
+.txt_10_2 {
+	font-size: 10px;
+	line-height: 1.25em;
+	color: #666666;
+}
+
+.txt_10_2_white {
+	font-size: 10px;
+	line-height: 1.25em;
+	color: #FFFFFF;
+}
+
+.txt_10_2_center {
+	font-size: 10px;
+	line-height: 1.25em;
+	color: #666666;
+	text-align: center;
+}
+
+/* メッセージ用 */
+.txt_15_b_message {
+	font-size: 14px;
+	font-weight: bold;
+	color: #666666;
+	line-height: 1.5em;
+}
+
+.txt_15_b_message_red {
+	font-size: 14px;
+	font-weight: bold;
+	color: #BF2626;
+	line-height: 1.5em;
+}
+.bgcolor_row_red {
+	background-color: #F9D3D3;
+}
+
+.txt_15_b_message_orange {
+	font-size: 14px;
+	font-weight: bold;
+	color: #c7aa35;
+	line-height: 1.5em;
+}
+.bgcolor_row_orange {
+	background-color: #ffe58d;
+}
+
+/*	color: #d47b24;*/
+
+/* ヘッダーエリア ==================================================*/
+#header {
+	margin: 0px auto;
+	padding: 0px;
+	width: 100%;
+}
+#header_bar {
+	margin: 0px;
+	padding: 0px;
+	height: 54px;
+	text-align: left;
+}
+#header #user {
+	margin: 0px;
+	padding: 12px 0px 0px;
+	text-align: left;
+}
+#header #headr_form {
+	padding-top: 0px;
+	margin-top: 16px;
+}
+		/* IE7 */
+		*+ html #header #headr_form {
+			padding-top: 0pt;
+			margin-top: 14px;
+		}
+		/* IE6以下 */
+		* html #header #headr_form {
+			padding-top: 0pt;
+			margin-top: 14px;
+		}
+
+
+
+/* メニュー */
+#header .header_menu_padding {
+	margin: 0px;
+	padding: 5px 20px;
+}
+
+
+
+
+
+/* コンテンツエリア ==================================================*/
+/* 背景キャラクター画像設定 */
+#wrapper_main {
+	/* background: #FFFFFF url(../../common/images/page_bg.gif) no-repeat right bottom; */
+	padding: 20px 0px;
+	margin: 0px;
+}
+
+
+
+/*	コンテンツエリア用　テーブル
+	コンテンツエリアはデフォルトで
+	W=720px, H=550px以上 センター揃	*/
+#wrapper_main #main_table {
+	padding: 0px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+/* TOPログイン用 */
+#toplogin_info {
+	margin: 20px;
+	width: 360px;
+}
+
+
+
+/* 項目マージン・余白　0 */
+.m_p_0 {
+	margin: 0px;
+	padding: 0px;
+	font-size: 1px;
+	line-height: 0px;
+}
+*+ html .m_p_0 {
+	padding: 0px;
+	font-size: 1px;
+	line-height: 0px;
+	margin-top: -2px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+}
+* html .m_p_0 {
+	padding: 0px;
+	font-size: 1px;
+	line-height: 0px;
+	margin-top: -2px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+}
+
+
+/* セル内余白 */
+.box_left10 {
+	margin: 0px;
+	padding: 10px;
+}
+.box_rihgt10 {
+	margin: 0px;
+	padding: 10px 10px 10px 0px;
+}
+
+
+
+
+/* 項目上アキ */
+.top_3 {
+	margin-top: 3px;
+}
+
+.top_5 {
+	margin-top: 5px;
+}
+
+.top_10 {
+	margin-top: 10px;
+}
+
+.top10_bottom05 {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+.top_20 {
+	margin-top: 20px;
+}
+
+.top_30 {
+	margin-top: 30px;
+}
+
+
+
+/* 項目下アキ */
+.bottom_0 {
+	padding: 0px;
+	margin-bottom: 0px;
+}
+
+.bottom_1 {
+	padding: 0px;
+	margin-bottom: 1px;
+}
+
+.bottom_5 {
+	padding: 0px;
+	margin-bottom: 5px;
+}
+
+.bottom_10 {
+	padding: 0px;
+	margin-bottom: 10px;
+}
+
+.bottom_10_lr10 {
+	padding: 0px;
+	margin-bottom: 10px;
+	margin-right: 10px;
+	margin-left: 10px;
+}
+
+.bottom_20_lr10 {
+	padding: 0px;
+	margin-bottom: 20px;
+	margin-right: 10px;
+	margin-left: 10px;
+}
+
+.bottom_20 {
+	padding: 0px;
+	margin-bottom: 20px;
+}
+
+.bottom_30 {
+	padding: 0px;
+	margin-bottom: 30px;
+}
+
+.bottom_50 {
+	padding: 0px;
+	margin-bottom: 50px;
+}
+
+.l_r_10 {
+	padding: 0px;
+	margin-right: 10px;
+	margin-left: 10px;
+}
+.l_10 {
+	padding: 0px;
+	margin-right: 0px;
+	margin-left: 10px;
+}
+.r_10 {
+	padding: 0px;
+	margin-right: 10px;
+	margin-left: 0px;
+}
+
+
+
+/* メッセージエリア用　上下アキ */
+.top_bottom_message {
+	margin-top: 15px;
+	margin-bottom: 30px;
+}
+
+
+
+/* IEテーブル　セル幅不具合ハック */
+		/* IE7 */
+		*+html .w_25 {
+			width: 25%;
+		}
+		/* IE6 */
+		*html .w_25 {
+			width: 25%;
+		}
+
+
+
+/* コンテンツ詳細設定-------------------------------------- */
+/* コンテンツヘッダー */
+#main_header_area {
+	margin: 0px 0px 10px;
+	padding: 0px;
+}
+
+
+
+/* タイムレコーダー　ボタン位置調整 */
+#timerecorder_txt {
+	padding: 0px;
+	margin-top: 2px;
+}
+		/* IE7 */
+		*+ html #timerecorder_form {
+			padding: 0px;
+			margin: 0px 0px -19px;
+		}
+		/* IE6以下 */
+		* html #timerecorder_form {
+			padding: 0px;
+			margin: 0px 0px -19px;
+		}
+
+
+
+/* ToDoリスト テーブル位置調整 */
+		/* IE7 */
+		*+ html #todo_list #todo_position {
+			margin: -2px 0px -2px -40px;
+			padding: 0px;
+		}
+		/* IE6以下 */
+		* html #todo_list #todo_position {
+			margin: -2px 0px -2px -40px;
+			padding: 0px;
+		}
+		
+		/* IE7 */
+		*+ html #todo_list #todo_position_2 {
+			margin: -2px 0px;
+			padding: 0px;
+		}
+		/* IE6以下 */
+		* html #todo_list #todo_position_2 {
+			margin: -2px 0px;
+			padding: 0px;
+		}
+
+
+
+/* トップページ設定選択 */
+.select_area {
+	width: 100%;
+	font-size: 12px;
+	color: #000000;
+	line-height: 1.5em;
+}
+
+
+
+/* 画面イメージ */
+.text_area {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+.text_area2 {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	height: 100%;
+}
+
+.text_area_txt12black {
+	width: 93%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #000000;
+}
+.text_area_txt12black_2 {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #000000;
+}
+
+.text_area_txt12black_3 {
+	width: 97%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #000000;
+}
+	/* IE7 */
+		*+ html .text_area_txt12black_3 {
+		width: 98%;
+		height: 100%;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.5em;
+		color: #000000;
+	}
+	/* IE6 */
+		* html .text_area_txt12black_3 {
+		width: 98%;
+		height: 100%;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.5em;
+		color: #000000;
+	}
+
+/* 1行テキストエリア */
+.text_area_txt12black_1line {
+	width: 97%;
+	margin: 0px;
+	padding: 0px;
+	font-size: 12px;
+	line-height: 1.25em;
+	color: #000000;
+}
+	/* IE7 カーソルあてた時に上下にズレるのをエリア高広げて対応 */
+	*+ html .text_area_txt12black_1line {
+		width: 98%;
+		height: 15px;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.25em;
+		color: #000000;
+	}
+	/* IE6 カーソルあてた時に上下にズレるのをエリア高広げて対応 */
+	* html .text_area_txt12black_1line {
+		width: 98%;
+		height: 15px;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.25em;
+		color: #000000;
+	}
+
+.text_area_txt12black_1line_center {
+	margin: 0px;
+	padding: 0px;
+	font-size: 12px;
+	line-height: 1.25em;
+	color: #000000;
+	text-align: center;
+}
+	/* IE7 カーソルあてた時に上下にズレるのをエリア高広げて対応 */
+	*+ html .text_area_txt12black_1line_center {
+		height: 15px;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.25em;
+		color: #000000;
+		text-align: center;
+	}
+	/* IE6 カーソルあてた時に上下にズレるのをエリア高広げて対応 */
+	* html .text_area_txt12black_1line_center {
+		height: 15px;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.25em;
+		color: #000000;
+		text-align: center;
+	}
+
+
+
+.text_area_txt12black_1line_left {
+	margin: 0px;
+	padding: 0px;
+	font-size: 12px;
+	line-height: 1.25em;
+	color: #000000;
+	text-align: left;
+}
+	/* IE7 カーソルあてた時に上下にズレるのをエリア高広げて対応 */
+	*+ html .text_area_txt12black_1line_center {
+		height: 15px;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.25em;
+		color: #000000;
+		text-align: left;
+	}
+	/* IE6 カーソルあてた時に上下にズレるのをエリア高広げて対応 */
+	* html .text_area_txt12black_1line_center {
+		height: 15px;
+		margin: 0px;
+		padding: 0px;
+		font-size: 12px;
+		line-height: 1.25em;
+		color: #000000;
+		text-align: left;
+	}
+
+
+
+/* 矢印画像　選択・追加・削除 */
+.allow_0 {
+	margin: 0px;
+	padding: 0px;
+	line-height: 1em;
+	font-size: 1px;
+}
+
+
+
+/* ボタン　サイズ */
+.btn_s {
+	font-size: 12px;
+	margin: 0px;
+	padding: 0px;
+}
+.btn_ss {
+	font-size: 10px;
+	margin: 0px;
+	padding: 0px;
+}
+
+
+
+/* フッターエリア ==================================================*/
+#footer {
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+	text-align: center;
+}
+
+
+
+
+
+
+/*=================================================================*/
+/* floatクリア用ハック*/
+#parentBox:after {
+content:".";
+display:block;
+height:0px;
+clear:both;
+visibility:hidden;
+}
+
+
+
+
+
+
+/*=================================================================*/
+/* ポップアップ */
+p#yrz_popup {
+position: absolute;
+background-color: #ffffff;
+color: #666666;
+border: 1px solid #666666;
+padding: 0.0em;
+margin: 0;
+font-size: 12px;
+width: 220px; 
+visibility: hidden;
+}
+
+p#yrz_popup_big {
+position: absolute;
+background-color: #ffffff;
+color: #666666;
+border: 1px solid #666666;
+padding: 0.0em;
+margin: 0;
+font-size: 12px;
+width: 320px; 
+visibility: hidden;
+}
+
+.dragdrop {
+position:relative;
+cursor:move;
+}
+
+.draglist {
+position:relative;
+border:0px;
+list-style:none;
+margin:0;
+padding:0;
+}
+
+
+
+
+
+
+/*=================================================================*/
+/* 処理中 */
+.loading_rotator_hide {
+	background-image:url('../../common/images/spacer.gif');
+	background-repeat:no-repeat;
+	background-position:left;
+}
+.loading_rotator_show {
+	background-image:url('../../common/images/loading.gif');
+	background-repeat:no-repeat;
+	background-position:left;
+}
+
+/*=================================================================*/
+/* 日曜日 */
+.txt_12_sunday {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #CC3333;
+}
+
+/* 土曜日 */
+.txt_12_saturday {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #3366FF;
+}
+
+/* 平日 */
+.txt_12_weekday {
+	font-size: 12px;
+	line-height: 1.5em;
+	color: #666666;
+}

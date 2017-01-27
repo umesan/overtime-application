@@ -1,0 +1,1102 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>万屋一家ver.2</title>
+	<meta name="robots" content="noindex" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="pragma" content="no-cache" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+	<link rel="shortcut icon" href="common/ico/kinnosuke_icon.ico" />
+	<link type="text/css" rel="stylesheet" href="common/css/v2_common.css" />
+	<link type="text/css" rel="stylesheet" href="common/css/v2_top_default.css" />
+	<script type="text/javascript" src="common/js/yui/yui/yui.js"
+		></script>
+	
+	<script type="text/javascript">
+		<!--
+			function changeMaxView(){
+	document.form1.submit();
+}
+
+function setAndSubmitPagination(formName, fieldContent) {
+	var flgPostOK = true;
+	if(typeof(yrz2PaginationCallback) !== 'undefined') {
+		flgPostOK = yrz2PaginationCallback();
+	}
+	if(flgPostOK) {
+		setPaginationPage(formName, fieldContent);
+		submitForm(formName);
+	}
+}
+
+function setPaginationPage(formName, fieldContent) {
+	form = document.getElementById(formName);
+	form.page.value = fieldContent;
+}
+function submitForm(formName) {
+	form = document.getElementById(formName);
+	form.submit();
+}
+
+function encodeURL(str) {
+  var character = '';
+  var unicode   = '';
+  var string    = '';
+  var i         = 0;
+
+  for (i = 0; i < str.length; i++) {
+    character = str.charAt(i);
+    unicode   = str.charCodeAt(i);
+
+    if (character == ' ') {
+      string += '+';
+    } else {
+      if (unicode == 0x2a || unicode == 0x2d || unicode == 0x2e || unicode == 0x5f || ((unicode >= 0x30) && (unicode <= 0x39)) || ((unicode >= 0x41) && (unicode <= 0x5a)) || ((unicode >= 0x61) && (unicode <= 0x7a))) {
+        string = string + character;
+      } else {
+        if ((unicode >= 0x0) && (unicode <= 0x7f)) {
+          character   = '0' + unicode.toString(16);
+          string += '%' + character.substr(character.length - 2);
+        } else if (unicode > 0x1fffff) {
+          string += '%' + (oxf0 + ((unicode & 0x1c0000) >> 18)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0x3f000) >> 12)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0xfc0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        } else if (unicode > 0x7ff) {
+          string += '%' + (0xe0 + ((unicode & 0xf000) >> 12)).toString(16);
+          string += '%' + (0x80 + ((unicode & 0xfc0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        } else {
+          string += '%' + (0xc0 + ((unicode & 0x7c0) >> 6)).toString(16);
+          string += '%' + (0x80 + (unicode & 0x3f)).toString(16);
+        }
+      }
+    }
+  }
+
+  return string;
+}
+
+function getText( element ) {
+  if( element.textContent ) {
+    return element.textContent;
+  } else if( element.innerText ) {
+    return element.innerText;
+  } else {
+    return '';
+  }
+}
+
+function getNodeValue( element ) {
+  if ( element.childNodes.length ) {
+    return element.childNodes[0].nodeValue
+  } else {
+    return '';
+  }
+}
+
+function changeText(where, what) {
+  if (document.getElementById) {
+    document.getElementById(where).innerHTML = what;
+  } else if (document.all) {
+    document.all[where].innerHTML = what;
+  }
+}
+function addText(where, what) {
+  if (document.getElementById) {
+    document.getElementById(where).innerHTML += '<br>';
+    document.getElementById(where).innerHTML += what;
+  } else if (document.all) {
+    document.all[where].innerHTML += '<br>';
+    document.all[where].innerHTML += what;
+  }
+}
+
+myFlg = 0;
+function blinkText(where, what, alt, interval){
+
+	setInterval(
+		function(){
+			if (myFlg == 0){
+				changeText(where, what);
+				myFlg = 1;
+			}else{
+				changeText(where, alt);
+				myFlg = 0;
+			}
+		}
+	, interval);
+}
+
+function saveScrollPosition(xname,yname) {
+	if(xname != null) {
+		document.getElementById(xname).value = getScrollPosX();
+	}
+	if(yname != null) {
+		document.getElementById(yname).value = getScrollPosY();
+	}
+}
+function getScrollPosX() {
+	var scrollX = 0;
+	switch(navigator.appName) {
+		case 'Microsoft Internet Explorer':
+			if(document.documentElement && document.documentElement.scrollLeft){
+				scrollX = document.documentElement.scrollLeft;
+			} else {
+				scrollX = document.body.scrollLeft;
+			}
+			break;
+		default:
+			scrollX = window.pageXOffset;
+			break;
+	}
+	return scrollX;
+}
+function getScrollPosY() {
+	return getScrollPosition();
+}
+function getScrollPosition() {
+	var scrollY = 0;
+	switch(navigator.appName) {
+		case 'Microsoft Internet Explorer':
+			if(document.documentElement && document.documentElement.scrollTop){
+				scrollY = document.documentElement.scrollTop;
+			} else {
+				scrollY = document.body.scrollTop;
+			}
+			break;
+		default:
+			scrollY = window.pageYOffset;
+			break;
+	}
+	return scrollY;
+}
+function scrollBodyXY( xpos,ypos ) {
+	window.scrollBy(xpos,ypos);
+}
+function scrollBody( ypos ) {
+	window.scrollBy(0,ypos);
+}
+
+function padDigits(n, totalDigits) {
+	n = n.toString(); 
+	var pd = ''; 
+	if (totalDigits > n.length) {
+		for (i=0; i < (totalDigits-n.length); i++) {
+			pd += '0';
+		}
+	}
+	return pd + n.toString();
+}
+function getElementX(obj) {
+	var pos = getElementPos(obj);
+	return pos[0];
+}
+
+function getElementY(obj) {
+	var pos = getElementPos(obj);
+	return pos[1];
+}
+function getElementPos(cobj){
+	var clft=cobj.offsetLeft;
+	var ctop=cobj.offsetTop;
+	while(cobj.offsetParent!=null){
+		var cpar=cobj.offsetParent;
+		clft+=cpar.offsetLeft;
+		ctop+=cpar.offsetTop;
+		cobj=cpar;
+	}
+	return [clft,ctop];
+}
+
+function urldecode( str ) {
+	var histogram = {}, histogram_r = {}, code = 0, str_tmp = [];
+	var ret = str.toString();
+	
+	var replacer = function(search, replace, str) {
+		var tmp_arr = [];
+		tmp_arr = str.split(search);
+		return tmp_arr.join(replace);
+	};
+	
+	histogram['!']   = '%21';
+	histogram['%20'] = '+';
+	
+	for (replace in histogram) {
+		search = histogram[replace];
+		ret = replacer(search, replace, ret);
+	}
+	
+	ret = decodeURIComponent(ret);
+	return ret;
+}
+
+function setTransparency(d,val){
+	var f=d.style;
+	if("opacity"in f) {
+		f.opacity=val;
+	} else if("MozOpacity"in f) {
+		f.MozOpacity=val;
+	} else if("filter"in f) {
+		var val = val * 100;
+		f.filter="alpha(opacity="+val+")";
+	}
+}
+
+function yrz2FwDisableOnProcessing() {
+	var domObj = document.getElementById('loadingRotatorFS');
+	domObj.style.display = '';
+}
+
+var yrz2FwIsOperationAllowedFlag = true;
+var yrz2FwIsMessageDisplayed = false;
+function yrz2FwMessageSetText(hdr,cnt,pos) {
+	var halign="center";
+	var valign="middle";
+	if(pos != undefined) {
+	}
+	
+	var domObj = document.getElementById('yrz2MessagePopup');
+	domObj.innerHTML = "\
+<table width='100%' height='100%'>\
+<tr valign='"+valign+"'><td align='"+halign+"'>\
+<table width='300px' class='border_gray_1px' cellpadding='0' cellspacing='0'>\
+<tr class='bgcolor_table_head'><td class='txt_12' align='center'>\
+<b>"+hdr+"<\/b>\
+<\/td><\/tr><tr><td class='txt_12' align='center'>\
+<br\/>"+cnt+"<br\/><br\/>\
+<\/td><\/tr>\
+<\/table>\
+<\/td>\
+<\/tr>\
+<\/table>";
+}
+function yrz2FwMessageDisplay() {
+	if(yrz2FwIsMessageDisplayed == false) {
+		yrz2FwIsMessageDisplayed = true;
+		var domObj = document.getElementById('yrz2MessagePopup');
+		domObj.style.display = '';
+		return true;
+	} else {
+		return false;
+	}
+}
+function yrz2FwMessageHide() {
+	var domObj = document.getElementById('yrz2MessagePopup');
+	domObj.style.display = 'none';
+}
+function yrz2FwDisplayInOperation(mde) {
+	if(mde==undefined | mde==0) {
+		yrz2FwMessageSetText("システムメッセージ","処理中です。もうしばらくお待ち下さい。");
+		setTimeout(function(){yrz2FwDisplayInOperation(1)},50);
+	} else {
+		if(!yrz2FwMessageDisplay()) {
+			setTimeout(function(){yrz2FwDisplayInOperation(1)},1000);
+		}
+	}
+}
+function yrz2FwIsOperationAllowed(dsptim) {
+	if(yrz2FwIsOperationAllowedFlag == true) {
+		yrz2FwIsOperationAllowedFlag = false;
+		if(dsptim != undefined) {
+			setTimeout(function(){yrz2FwDisplayInOperation(0)},dsptim*1000);
+		}
+		return true;
+	}
+	return false;
+}
+function yrz2FwResetOperationAllowedFlag() {
+	yrz2FwIsOperationAllowedFlag = true;
+}
+
+function yrz2FwDecodeHtmlSpecialChars (string, quote_style) {
+	var optTemp = 0;
+	var noquotes = false;
+	
+	if (typeof quote_style === 'undefined') {
+		quote_style = 2;
+	}
+	var OPTS = {
+		'ENT_NOQUOTES': 0,
+		'ENT_HTML_QUOTE_SINGLE': 1,
+		'ENT_HTML_QUOTE_DOUBLE': 2,
+		'ENT_COMPAT': 2,
+		'ENT_QUOTES': 3,
+		'ENT_IGNORE': 4,
+		'ENT_NOBRACKETS': 8,
+		'ENT_NOAMPERSAND': 16
+	};
+	if (quote_style === 0) {
+		noquotes = true;
+	}
+	if (typeof quote_style !== 'number') {
+		quote_style = [].concat(quote_style);
+		var i = 0;
+		for (i = 0; i < quote_style.length; i++) {
+			if (OPTS[quote_style[i]] === 0) {
+				noquotes = true;
+			} else if (OPTS[quote_style[i]]) {
+				optTemp = optTemp | OPTS[quote_style[i]];
+			}
+		}
+		quote_style = optTemp;
+	}
+	if (!(quote_style & OPTS.ENT_NOBRACKETS)) {
+		string = string.toString().replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+	}
+	if (quote_style & OPTS.ENT_HTML_QUOTE_SINGLE) {
+		string = string.replace(/&#0*39;/g, "'"); // PHP doesn't currently escape if more than one 0, but it should
+		// string = string.replace(/&apos;|&#x0*27;/g, "'"); // This would also be useful here, but not a part of PHP
+	}
+	if (!noquotes) {
+		string = string.replace(/&quot;/g, '"');
+	}
+	if(!(quote_style & OPTS.ENT_NOAMPERSAND)) {
+		string = string.replace(/&amp;/g, '&');
+	}
+	return string;
+}
+
+function yrz2UpdateAndDoAction(_elementName,_cookieName,_obj,_action){
+	if ( typeof _elementName!='undefined' && typeof (_cookieName)!='undefined'){
+		yrz2UpdateCookie(_elementName,_cookieName);
+		if ( typeof _action!='undefined' ){
+			yrz2DoAction(_obj,_action);
+		}
+	}
+}
+
+function yrz2UpdateCookie(_elementName,_cookieName){
+	if (typeof (_elementName)!='undefined' ){
+		var name = document.getElementsByName(_elementName);
+		if ( typeof(name[0])!='undefined' ){
+			setCookie( _cookieName, name[0].options[name[0].selectedIndex].value );
+		} else {
+			setCookie( _cookieName, -1 );
+		}
+	}
+}
+
+function yrz2DoAction(_obj,_action){
+	if(typeof(_obj) != 'undefined'){
+		if(typeof(_action) != 'undefined'){
+			if (_action=='submit'){
+				_obj.submit();
+			} else {
+				_obj.location.href = _action;
+			}
+		} 
+	}
+}
+
+
+
+		-->
+	</script>
+</head>
+<body >
+<!-- ヘッダー -->
+<div id="header">
+	<div id="header_bar">
+				<table width="100%" style="height:54px;" border="0" cellpadding="0" cellspacing="0" class="header_bg">
+			<tr>
+				<td width="20"><img src="common/images/spacer.gif" alt="" width="20" height="1" /></td>
+				<td width="106"><a href="./"><img src="common/img_default/00_top_header_logo_kin.gif" alt="万屋一家" height="39" border="0" /></a></td>
+				<td width="20"><img src="common/images/spacer.gif" alt="" width="20" height="1" /></td>
+				<td valign="top">
+					<div id="user">
+						<div class="user_name">サンプル株式会社 N'UIチーム 勤野 助太郎さん</div>
+ 
+						<div class="user_login">前回ログイン：2017-01-27 19:30:19</div>
+					
+					</div>
+				</td>
+				<td width="10">
+					<img src="common/images/spacer.gif" alt="" width="10" height="1" />
+				</td>
+				<td align="right" valign="middle">
+					<noscript><span class="user_name">※JavaScript を有効にしてください。　<br/></span></noscript>
+														</td>
+				<td align="right" valign="top"><div id="headr_form" class="txt_12_2">
+						<script type="text/JavaScript">
+						<!--
+						function MM_jumpMenu(targ,selObj,restore){ //v3.0
+							if ( selObj.options[selObj.selectedIndex].value == 'ja' ) {
+								setCookie( "language", 'ja' );
+								location.reload();
+							} else if ( selObj.options[selObj.selectedIndex].value == 'en' ) {
+								setCookie( "language", 'en' );
+								location.reload();
+							} else {
+								eval(targ+".location='"+selObj.options[selObj.selectedIndex].value+"'");
+								if (restore) selObj.selectedIndex=0;
+							}
+						}
+						function setCookie( key, val, tmp ){
+							tmp = key + "=" + escape(val) + "; ";
+							// tmp += "path=" + location.pathname + "; ";
+							// tmp += "expires=Tue, 31-Dec-2030 23:59:59; ";
+							document.cookie = tmp;
+						}
+
+						-->
+						</script>
+						<form method="post" action="./">
+							<select name="kihon_settei" size="1" onchange="MM_jumpMenu('parent',this,1)">
+								<option value="#" selected="selected">（各種基本設定）</option>
+								<option value="./?module=menu&amp;action=lineup">メニューリスト</option>
+								<option value="./?module=individual&amp;action=toppage">個人設定</option>
+								<option value="./?module=manual&amp;action=manual">操作ガイド</option>
+														</select>
+							<input type="submit" name="logout" value="ログアウト" />
+							<input type="hidden" name="module" value="logout" />
+						</form>
+					</div>
+				</td>
+				<td width="20">
+					<img src="common/images/spacer.gif" alt="" width="20" height="1" />
+				</td>
+			</tr>
+		</table>
+	</div>
+	<!-- アイコンメニュー -->
+			<div id="header_menu">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="header_menu_bgcolor">
+				<tr>
+					<td align="left" class="header_menu_padding">
+						<table border="0" cellpadding="0" cellspacing="0">
+							<tr>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=timesheet&amp;action=browse">
+											<img src="common/img_icon/main_icon_Syukkinbo.gif" alt="出勤簿" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=application_form&amp;action=application_form">
+											<img src="common/img_icon/main_icon_KakusyuShinsei.gif" alt="各種申請" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=vacation_history&amp;action=vacation_history">
+											<img src="common/img_icon/main_icon_KyuukaRireki.gif" alt="休暇履歴" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke/payslip&amp;action=yonosuke/payslip">
+											<img src="common/img_icon/main_icon_KyuuyoMeisaisyo.gif" alt="給与明細書" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke_closing/taxwithholdingslip&amp;action=yonosuke_closing/taxwithholdingslip">
+											<img src="common/img_icon/main_icon_GensenCyousyuuhyo.gif" alt="源泉徴収票" width="62" height="53" />
+										</a>
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																																							<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+															</tr>
+							<tr class="txt_10_2_center">
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=timesheet&amp;action=browse">
+											出勤簿
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=application_form&amp;action=application_form">
+											各種申請
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=vacation_history&amp;action=vacation_history">
+											休暇履歴
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke/payslip&amp;action=yonosuke/payslip">
+											給与<br />明細書
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			<a href="./?module=yonosuke_closing/taxwithholdingslip&amp;action=yonosuke_closing/taxwithholdingslip">
+											源泉<br />徴収票
+										</a>
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+																																																														<td align="center" valign="top" width="72">
+																			&nbsp;
+																		</td>
+															</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+<!-- /ヘッダー -->
+<table width="100%">
+	<tr>
+		<td width="120" align="center" valign="top">
+
+		</td>
+		<td align="center" valign="top">
+
+
+<!-- コンテンツ -->
+<script type="text/javascript">
+
+	function getRpcResponse( module, action, functionname, parameters, freeoption ) {
+		var url = './?module=' + module + '&action=' + action;
+		if( functionname != '' ) {
+			url = url + "&function=" + functionname;
+		}
+		if ( parameters != '' ) {
+			url = url + "&" + parameters;
+		}
+		
+		if ( typeof XMLHttpRequest != 'undefined' ) {
+			xmlhttp = new XMLHttpRequest();
+		} else {
+			try {
+				xmlhttp = new ActiveXObject( 'Msxml2.XMLHTTP' );
+			} catch (e) {
+				try {
+					xmlhttp = new ActiveXObject( 'Microsoft.XMLHTTP' );
+				} catch (e) {
+					xmlhttp = false;
+				}
+			}
+		}
+			
+		if ( xmlhttp ) {
+			xmlhttp.onreadystatechange = function() {
+				try {
+					if ( xmlhttp.readyState == 4 && xmlhttp.status == 200 ) {
+						var obj = xmlhttp.responseXML;
+						var root_node = obj;
+						if ( functionname == '' ) {
+							root_node = obj.getElementsByTagName( 'rpc_result' );
+						}
+						data_set( root_node, module, action, functionname, freeoption );
+					}
+				} catch (e) {
+					alert('セッションタイムアウトになりました。再ログインして下さい。');
+					lock = 0;
+				}
+			}
+			xmlhttp.open( 'GET', url );
+			xmlhttp.send( null );
+		}
+	}
+	function getRpcData( id_name, module, action ) {
+		var frm = document.getElementById( id_name );
+		var val = frm.value;
+		getRpcResponse( module, action, '', 'param=' + val );
+	}
+
+
+var idMapping = {1:76,2:77,3:87};
+function disassembleId(id) {
+	regex = /^li_right_([0-9]*)$/;
+	var tmp = id.match( regex );
+	if(tmp) {
+		return Number(tmp[1]);
+	}
+	return false;
+}
+
+(function() {
+	YUI().use('dd-ddm', 'dd-drag' , 'dd-proxy' , 'anim',  function(Y) {
+		var lastY;
+		
+		function dragdropinit() {
+			var i,j;
+			var ob_r = [];
+			var ob_l = [];
+			
+			new Y.DD.Drop({
+				node: '#ul_right'
+			});
+			
+			for(j=1;j<=3;j++) {
+				ob_r[j] = new Y.DD.Drag({
+					node: '#li_right_'+j,
+					target: {
+						padding: '0 0 0 20'
+					}
+				}).plug(Y.Plugin.DDProxy, {
+					moveOnEnd: false,
+					hideOnEnd: false
+				});
+				
+				ob_r[j].on('drag:start', function(e) {
+					var dragEl = e.target.get('dragNode');
+					var clickEl = e.target.get('node');
+					clickEl.setStyle('opacity','.25');
+					dragEl.set('innerHTML',clickEl.get('innerHTML'));
+					dragEl.set('visibility','');
+				});
+				
+				ob_r[j].on('drag:end', function(e) {
+					var dragEl = e.target.get('dragNode');
+					var sourceEl = e.target.get('node');
+					
+					var tpos = { xy: [sourceEl.getXY()[0], sourceEl.getXY()[1]] };
+					var animator = new Y.Anim({
+						node: dragEl,
+						duration: 0.2,
+						easing: Y.Easing.easeOut,
+						to: tpos
+					});
+					animator.on('end', function(e) {
+						dragEl.setStyle('visibility','hidden');
+						sourceEl.setStyle('opacity','1');
+					});
+					animator.run();
+					
+					var parseSetting = function(ul) {
+						var items = ul.getElementsByTagName("li");
+						var out = "";
+						for(i=0;i<items.length;i++) {
+							var tid = disassembleId(items[i].id);
+							var iid = idMapping[tid];
+							out+=iid+",";
+						}
+						return out;
+					}
+					
+					var targetul = document.getElementById("ul_right");
+					var targetst = parseSetting(targetul);
+					
+					var optional = new Array(
+						targetst
+					);
+					
+					getRpcResponse('individual','xmlrpc','modifytop','target=right&setting=' + targetst, optional);
+				});
+				ob_r[j].on('drag:drag', function(e) {
+					var y = e.target.lastXY[1];
+					if(y < lastY) {
+						goingUp = true;
+					}else if(y > lastY) {
+						goingUp = false;
+					}
+					lastY = y;
+				});
+				ob_r[j].on('drag:drophit', function(e) {
+					var dragEl = e.drag.get('node');
+					var dropEl = e.drop.get('node');
+					if(dropEl.get('tagName').toLowerCase() !== "li") {
+						if(!dropEl.contains(dragEl)) {
+							dropEl.appendChild(dragEl);
+						}
+					}
+				});
+				ob_r[j].on('drag:over', function(e) {
+					var dragEl = e.drag.get('node');
+					var dropEl = e.drop.get('node');
+					if(dropEl.get('tagName').toLowerCase() === "li") {
+						if(!goingUp) {
+							dropEl = dropEl.get('nextSibling');
+						}
+						e.drop.get('node').get('parentNode').insertBefore(dragEl,dropEl);
+						e.drop.sizeShim();
+					}
+				});
+			}
+		}
+		Y.on("domready",dragdropinit);
+	})
+})();
+
+function data_set( root_node, module, action, functionname, freeoption ) {
+}
+</script>
+
+<div id="dummy" class="dragdrop"></div>
+<div id="wrapper_main" align="center">
+	<!-- コンテンツエリアはデフォルトで　W=720px, H=550px以上 -->
+	<table width="720" style="height:550px;" border="0" cellpadding="0" cellspacing="0" class="txt_12" id="main_table">
+		<tr>
+			<td align="center" valign="top">
+				<table width="720" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td align="left" valign="top"><div id="main_header_top">トップページ</div></td>
+					</tr>
+				</table>
+				<table width="700" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td width="448" align="left" valign="top">
+															<div id="oshirase">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>
+				<div id="sub_header_bg_top">
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td align="left" class="txt_15_b">お知らせ</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<div class="sub_header_bg_shadow_top">
+							</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+													</td>
+						<td width="10" valign="top"><img src="common/images/spacer.gif" alt="" width="10" height="1" /></td>
+						<td width="242" valign="top">
+							<ul id="ul_right" class="draglist">
+																																						<li id="li_right_1">
+								<script type="text/JavaScript">
+<!--
+
+function trDoStamping(itid) {
+	if(yrz2FwIsOperationAllowed()) {
+		var submitForm = document.getElementById('tr_submit_form');
+		var btn=document.getElementsByName("_stampButton");
+		for(var i=0;i<btn.length;i++) {
+			btn[i].disabled=true;
+		}
+		document.getElementById("scrollbody_tr").value=getScrollPosition();
+		submitForm.timerecorder_stamping_type.value=itid;
+		submitForm.submit();
+	}
+	return false;
+}
+
+-->
+</script>
+<div id="time_recorder">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>
+				<!-- 小見出し -->
+				<div id="sub_header_bg_top">
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tr id="dd_hdl_right_1">
+							<td align="left" class="txt_15_b">タイムレコーダー</td>
+														<td align="right" valign="top" class="txt_10_none_color_border_1">有給休暇残：21日</td>
+													</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="sub_header_border_top">
+					<form action="./" method="post" id="tr_submit_form"> <input type="hidden" name="__sectag_bb636b88448a4e14070ef4578c5a51ab" value="f5141853757ed91758a6547dddbe51a72e98df2bf0d8697e4f4789987a12c65b"/>
+						<input type="hidden" name="module" value="timerecorder"/>
+						<input type="hidden" name="action" value="timerecorder"/>
+						<input type="hidden" id="scrollbody_tr" name="scrollbody" value=""/>
+						<input type="hidden" name="timerecorder_stamping_type" value=""/>
+						<table width="100%" border="0" cellpadding="0" cellspacing="0" class="txt_12">
+							<tr valign="top" align="center" style="height:40px;">
+	<td>
+		<td align="center" nowrap><div id="timerecorder_txt">出社<br/>(09:57)</div></td>
+	</td>
+	<td>
+		<td align="center" nowrap><div id="timerecorder_txt">退社<br/>(23:15)</div></td>
+	</td>
+							</tr>
+						</table>
+					</form>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+								</li>
+																																							<li id="li_right_2">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>
+				<!-- 小見出し -->
+				<div id="sub_header_bg_top">
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tr id="dd_hdl_right_2">
+							<td align="left" class="arrow_left">
+								<form id="before_form" name="before_form" action="./" method="post"> <input type="hidden" name="__sectag_bb636b88448a4e14070ef4578c5a51ab" value="f5141853757ed91758a6547dddbe51a72e98df2bf0d8697e4f4789987a12c65b"/>
+									<input type="hidden" name="module" value="top"/>
+									<input type="hidden" name="calendar_yyyymm" value="201612"/>
+									<input type="hidden" id="scrollbody_before" name="scrollbody" value=""/>
+									<div class="txt_12_none_color_border_3">
+										<a href="javascript:document.getElementById('scrollbody_before').value=getScrollPosition();document.getElementById('before_form').submit();"><img src="common/images/spacer.gif" alt="" width="14" height="14" /></a>
+									</div>
+								</form>
+							</td>
+							<td align="center" class="txt_15_b">2017年01月</td>
+							<td align="right" class="arrow_right">
+								<form id="next_form" name="next_form" action="./" method="post"> <input type="hidden" name="__sectag_bb636b88448a4e14070ef4578c5a51ab" value="f5141853757ed91758a6547dddbe51a72e98df2bf0d8697e4f4789987a12c65b"/>
+									<input type="hidden" name="module" value="top"/>
+									<input type="hidden" name="calendar_yyyymm" value="201702"/>
+									<input type="hidden" id="scrollbody_next" name="scrollbody" value=""/>
+									<div class="txt_12_none_color_border_3">
+										<a href="javascript:document.getElementById('scrollbody_next').value=getScrollPosition();document.getElementById('next_form').submit();"><img src="common/images/spacer.gif" alt="" width="14" height="14" /></a>
+									</div>
+								</form>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="sub_header_border_top">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" class="txt_12_none_color_border_1">
+						<tr align="center" class="bgcolor_gray">
+							<td width="15%" class="txt_12_sunday">日</td>
+							<td width="14%">月</td>
+							<td width="14%">火</td>
+							<td width="14%">水</td>
+							<td width="14%">木</td>
+							<td width="14%">金</td>
+							<td width="15%" class="txt_12_saturday">土</td>
+						</tr>
+
+																												<tr align="center" class="bgcolor_white">
+																																		<td class="txt_12_sunday">1</td>
+																																				<td>2</td>
+																																				<td>3</td>
+																																				<td>4</td>
+																																				<td>5</td>
+																																				<td>6</td>
+																																				<td class="txt_12_saturday">7</td>
+																								</tr>
+																												<tr align="center" class="bgcolor_gray">
+																																		<td class="txt_12_sunday">8</td>
+																																				<td>9</td>
+																																				<td>10</td>
+																																				<td>11</td>
+																																				<td>12</td>
+																																				<td>13</td>
+																																				<td class="txt_12_saturday">14</td>
+																								</tr>
+																												<tr align="center" class="bgcolor_white">
+																																		<td class="txt_12_sunday">15</td>
+																																				<td>16</td>
+																																				<td>17</td>
+																																				<td>18</td>
+																																				<td>19</td>
+																																				<td>20</td>
+																																				<td class="txt_12_saturday">21</td>
+																								</tr>
+																												<tr align="center" class="bgcolor_gray">
+																																		<td class="txt_12_sunday">22</td>
+																																				<td>23</td>
+																																				<td>24</td>
+																																				<td>25</td>
+																																				<td>26</td>
+																																				<td class="bgcolor_today">27</td>
+																																				<td class="txt_12_saturday">28</td>
+																								</tr>
+																												<tr align="center" class="bgcolor_white">
+																																		<td class="txt_12_sunday">29</td>
+																																				<td>30</td>
+																																				<td>31</td>
+																																				<td></td>
+																																				<td></td>
+																																				<td></td>
+																																				<td class="txt_12_saturday"></td>
+																								</tr>
+													<tr>
+								<td colspan="7" align="center">
+									<div id="cal_evt_txt">&nbsp;</div>
+								</td>
+							</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+<p id="yrz_popup" class="yrz_popup" align="left"></p>
+
+								</li>
+																																							<li id="li_right_3">
+								<div id="vacation_remainder">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="txt_12_none_color_border_1">
+		<tr id="dd_hdl_right_3">
+			<td>
+				<!-- 小見出し -->
+				<div id="sub_header_bg_top">
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td align="left" class="txt_15_b">
+								休暇残日数・時間
+							</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="sub_header_border_top">
+				<table border="0" cellpadding="3" cellspacing="0" width="100%" class="bgcolor_gray2">
+					<tr class="bgcolor_table_head">
+						<td align="left">
+							休暇種類
+						</td>
+						<td align="center" width="48">
+							残日数
+						</td>
+						<td align="center" width="48">
+							残時間
+						</td>
+					<tr>
+					<tr class="bgcolor_white">
+						<td align="left">
+							有給休暇
+						</td>
+						<td align="center">
+							21
+						</td>
+						<td align="center">
+							0:00
+						</td>
+					</tr>
+					<tr class="bgcolor_table">
+						<td align="left">
+							振替休日
+						</td>
+						<td align="center">
+							0
+						</td>
+						<td align="center">
+							0:00
+						</td>
+					</tr>
+					<tr class="bgcolor_white">
+						<td align="left">
+							代休
+						</td>
+						<td align="center">
+							0
+						</td>
+						<td align="center">
+							0:00
+						</td>
+					</tr>
+				</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+								</li>
+																						</ul>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</div>
+<!-- /コンテンツ -->
+
+
+		</td>
+		<td width="120" valign="top">
+			<br />
+		</td>
+	</tr>
+</table><div id="footer" class="txt_10_2"> 
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="footer_bg">
+		<tr>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+	万屋一家シリーズ Ver. 2.1.1306.1<br />
+	Copyright &copy; 2006-2017 HOYA Service Corp. All rights reserved.<br />
+	<br/>
+	</div>
+<div id="yrz2MessagePopup" style="display:none;"></div></body>
+</html>
