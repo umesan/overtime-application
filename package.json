@@ -1,0 +1,61 @@
+{
+  "name": "OVERTIME_APPLICATION",
+  "description": "残業さん:万屋一家シリーズの勤怠管理システム 勤之助ver.2 の残業申請入力を支援する非公式ツール",
+  "version": "3.0.0",
+  "author": "@umesan",
+  "main": "",
+  "keywords": [
+    "残業怖い",
+    "残業つらい",
+    "残業やばい",
+    "残業苦しい",
+    "残業助けて",
+    "残業もういや"
+  ],
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/umesan/overtime-application.git"
+  },
+  "scripts": {
+    "start": "npm-run-all -p server watchstart",
+
+    "server": "http-server",
+    "watchstart": "watch 'yarn run build:watch' ./src",
+
+    "build:watch": "npm-run-all -s clean uglifyjs:bookmarklet_import uglifyjs:bookmarklet_export concat:import concat:export uglifyjs:docs_import uglifyjs:docs_export copy:css copy:icons copy:json copy:js concat:content_script",
+    "build": "npm-run-all -s clean uglifyjs:bookmarklet_import uglifyjs:bookmarklet_export concat:import concat:export uglifyjs:docs_import uglifyjs:docs_export replace:build copy:css copy:icons copy:json copy:js concat:content_script zip",
+
+    "clean": "rimraf ./chrome_extension/* ./bookmarklet/* ./docs/* chrome_extension.zip",
+
+    "uglifyjs:bookmarklet_import": "uglifyjs -o bookmarklet/import.min.js ./src/bookmarklet/import.js",
+    "uglifyjs:bookmarklet_export": "uglifyjs -o bookmarklet/export.min.js ./src/bookmarklet/export.js",
+
+    "concat:import": "concat-cli -f src/common/lib/jquery.min.js -f src/common/js/import.js -o docs/import.min.js",
+    "concat:export": "concat-cli -f src/common/lib/jquery.min.js -f src/common/js/export.js -o docs/export.min.js",
+    "uglifyjs:docs_import"  : "uglifyjs -o docs/import.min.js ./docs/import.min.js",
+    "uglifyjs:docs_export"  : "uglifyjs -o docs/export.min.js ./docs/export.min.js",
+
+    "copy:css:": "cpx \"./src/chrome_extension/css/*\" ./chrome_extension/css",
+    "copy:icons:": "cpx \"./src/chrome_extension/icons/*\" ./chrome_extension/icons",
+    "copy:json:": "cpx \"./src/chrome_extension/*.json\" ./chrome_extension",
+    "copy:js:": "cpx \"./src/chrome_extension/js/*\" ./chrome_extension/js",
+
+    "concat:content_script": "concat-cli -f src/chrome_extension/js/content_script/exportData.js -f src/common/js/export.js -f src/common/js/import.js -o chrome_extension/js/content_script.js",
+    "uglifyjs:content_script": "uglifyjs -o chrome_extension/js/content_script.js chrome_extension/js/content_script.js",
+
+    "replace:build": "replace 'http:\/\/127.0.0.1:8080\/docs\/' 'https://umesan.github.io/overtime-application/' ./bookmarklet/*.js",
+    "zip": "bestzip chrome_extension.zip chrome_extension/"
+  },
+  "devDependencies": {
+    "concat-cli": "^4.0.0",
+    "cpx": "^1.5.0",
+    "npm-run-all": "^4.0.0",
+    "replace": "^0.3.0",
+    "uglify-js": "^2.7.5",
+    "watch": "^1.0.1",
+    "rimraf": "^2.5.4",
+    "bestzip": "^1.1.3",
+    "http-server": "^0.9.0"
+  }
+}

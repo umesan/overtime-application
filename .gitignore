@@ -1,0 +1,5 @@
+.DS_Store
+/node_modules
+/chrome_extension
+chrome_extension.zip
+npm-debug.log.*
