@@ -3,3 +3,4 @@
 /chrome_extension
 chrome_extension.zip
 npm-debug.log.*
+dist/
