@@ -1,0 +1,41 @@
+.zangyousan-top{
+  display: table;
+  background-color: #fff9ea;
+  border: 1px solid #dfd8c2;
+  border-radius: 3px;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.zangyusan-top__main,
+.zangyusan-top__sub {
+  display: table-cell;
+  padding: 3px 5px 3px 10px;
+  vertical-align: middle;
+}
+.zangyusan-top__main{
+  font-size: 11px;
+}
+.zangyusan-top__sub{
+  padding-left: 0;
+  text-align: right;
+}
+.zangyousan-top__link{
+  background: #ffffff !important;
+  border: 1px solid buttonface !important;
+  margin: 5px 3px !important;
+  padding: 5px 10px 4px !important;
+  border-radius: 3px !important;
+  box-sizing: border-box !important;
+  color: buttontext !important;
+  display: inline-block !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  &:link,
+  &:visited {
+    color: buttontext !important;
+  }
+  &:hover {
+    color: buttontext !important;
+  }
+}
