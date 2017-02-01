@@ -4,8 +4,8 @@
 (function($){
 
   // 出勤簿画面にいるかチェック
-  if(bookmarklet && document.domain === 'www.4628.jp' && !$('#submit_form0').length){
-    alert('万屋一家シリーズ勤之助ver.2の「出勤簿画面」で実行してください');
+  if(bookmarklet && document.domain === 'www.4628.jp' && !$('#submit_form0').length && !$('#time_recorder').length){
+    alert('万屋一家シリーズ勤之助ver.2の「TOP」か「出勤簿画面」で実行してください');
     return;
   }
 
@@ -34,10 +34,22 @@
         that.state.application_form_master_id = $(data).find('#slct_appformmasterid').eq(0).find('option').filter(function(){
           return $(this).text() === '残業申請*';
         }).val();
-        that.addRow();
-        if(bookmarklet){
-          alert('[残業さんを実行します]\n下記の手順で残業申請を行ってください。\n\n1. この画面に残業申請ボタン列が追加されます。\n2. 各ボタンを押して残業申請画面に進んでください。\n3. 残業申請画面にてインポートブックマークレットを実行してください。\n4. 日時が自動挿入されます。確認後、申請してください。');
+
+        // TOP画面の場合
+        if($('#time_recorder').length){
+          that.addBtn();
+          return;
         }
+
+        // 出勤簿画面の場合
+        if ($('#submit_form0').length){
+          that.addRow();
+          if(bookmarklet){
+            alert('[残業さんを実行します]\n下記の手順で残業申請を行ってください。\n\n1. この画面に残業申請ボタン列が追加されます。\n2. 各ボタンを押して残業申請画面に進んでください。\n3. 残業申請画面にてインポートブックマークレットを実行してください。\n4. 日時が自動挿入されます。確認後、申請してください。');
+          }
+          return;
+        }
+
       });
     },
 
@@ -204,6 +216,53 @@
 
 
     },
+
+    /**
+     * TOP画面残業申請ボタンの追加
+     */
+    addBtn: function(){
+
+      // 退社しているかチェック
+      var timebtn = $('#tr_submit_form').find('td').eq(1).find('button');
+      if (!timebtn.length){
+
+        var dt = new Date();
+
+        //年
+        var year = dt.getFullYear();
+
+        //月
+        var month = dt.getMonth();
+
+        //日
+        var date = dt.getDate();
+
+        // 退社時刻
+        var timetext = $('#tr_submit_form').find('td').eq(1).text();
+        timetext = timetext.replace('退社','');
+        timetext = timetext.replace('(','');
+        timetext = timetext.replace(')','');
+
+        var param = [];
+        var d = [year, month, date];
+        d = d.concat(timetext.split(':'));
+        param.push(d);
+
+        if(bookmarklet) {
+          alert('お疲れ様でした。残業申請画面へ遷移します。');
+          location.href = overtimeReportPath + '?' + $.param(reqParam(param));
+        } else {
+          // タグの作成
+          var btnTag = '<div class="zangyousan-top"><div class="zangyusan-top__main">お疲れ様でした。</div><div class="zangyusan-top__sub"><a href="' + overtimeReportPath + '?' + $.param(reqParam(param)) + '" class="zangyousan-top__link" target="_blank">本日の残業を申請</a></div></div>';
+          $('#tr_submit_form').append(btnTag);
+        }
+      } else {
+        if(bookmarklet) {
+          alert('退社後に実行してください。');
+        }
+      }
+    },
+
 
     /**
      * カラムテキスト抽出
