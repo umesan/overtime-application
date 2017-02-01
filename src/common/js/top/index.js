@@ -53,7 +53,8 @@ export default () => {
 const addBtn = () => {
 
   // 退社しているかチェック
-  const timebtn = $('#tr_submit_form').find('td').eq(1).find('button');
+  const $timebtnTd = $('#tr_submit_form').find('tr').eq(0).find('td:last-child');
+  const timebtn = $timebtnTd.find('button');
   if (!timebtn.length){
 
     var dt = new Date();
@@ -68,7 +69,7 @@ const addBtn = () => {
     const date = dt.getDate();
 
     // 退社時刻
-    var timetext = $('#tr_submit_form').find('td').eq(1).text();
+    var timetext = $timebtnTd.text();
     timetext = timetext.replace('退社','');
     timetext = timetext.replace('(','');
     timetext = timetext.replace(')','');
