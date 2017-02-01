@@ -264,7 +264,6 @@
       }
     },
 
-
     /**
      * カラムテキスト抽出
      * @param  {jQueryObject} $cols 対象のtd要素
