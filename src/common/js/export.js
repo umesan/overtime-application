@@ -223,7 +223,8 @@
     addBtn: function(){
 
       // 退社しているかチェック
-      var timebtn = $('#tr_submit_form').find('td').eq(1).find('button');
+      var $timebtnTd = $('#tr_submit_form').find('tr').eq(0).find('td:last-child');
+      var timebtn = $timebtnTd.find('button');
       if (!timebtn.length){
 
         var dt = new Date();
@@ -238,7 +239,7 @@
         var date = dt.getDate();
 
         // 退社時刻
-        var timetext = $('#tr_submit_form').find('td').eq(1).text();
+        var timetext = $timebtnTd.text();
         timetext = timetext.replace('退社','');
         timetext = timetext.replace('(','');
         timetext = timetext.replace(')','');
@@ -250,10 +251,10 @@
 
         if(bookmarklet) {
           alert('お疲れ様でした。残業申請画面へ遷移します。');
-          location.href = overtimeReportPath + '?' + $.param(reqParam(param));
+          location.href = '/?' + $.param(this.reqParam(param));
         } else {
           // タグの作成
-          var btnTag = '<div class="zangyousan-top"><div class="zangyusan-top__main">お疲れ様でした。</div><div class="zangyusan-top__sub"><a href="' + overtimeReportPath + '?' + $.param(reqParam(param)) + '" class="zangyousan-top__link" target="_blank">本日の残業を申請</a></div></div>';
+          var btnTag = '<div class="zangyousan-top"><div class="zangyusan-top__main">お疲れ様でした。</div><div class="zangyusan-top__sub"><a href="/?' + $.param(this.reqParam(param)) + '" class="zangyousan-top__link" target="_blank">本日の残業を申請</a></div></div>';
           $('#tr_submit_form').append(btnTag);
         }
       } else {
