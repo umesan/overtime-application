@@ -32,7 +32,7 @@
       })
       .done(function(data) {
         that.state.application_form_master_id = $(data).find('#slct_appformmasterid').eq(0).find('option').filter(function(){
-          return $(this).text() === '残業申請*';
+          return $(this).text().match(/^残業申請/);
         }).val();
 
         // TOP画面の場合
